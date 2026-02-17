@@ -1,29 +1,27 @@
 {
   "expo": {
-    "name": "My App",
-    "slug": "my-app",
+    "name": "CulturePass",
+    "slug": "culturepass",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "culturepass",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1B2838"
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.myapp"
+      "bundleIdentifier": "com.culturepass"
     },
     "android": {
-      "package": "com.myapp",
+      "package": "com.culturepass",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#1B2838",
+        "foregroundImage": "./assets/images/icon.png"
       }
     },
     "web": {
