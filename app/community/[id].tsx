@@ -31,6 +31,14 @@ export default function CommunityDetailScreen() {
   const navigation = useNavigation();
   const goBack = () => navigation.canGoBack() ? router.back() : router.replace("/");
 
+  const { data: memberships = [] } = useQuery<Membership[]>({
+    queryKey: ["/api/memberships"],
+    enabled: isAuthenticated,
+  });
+  const isJoined = memberships.some((m) => m.orgId === id);
+
+  const { data: org, isLoading } = useQuery<Organisation>({ queryKey: ['/api/organisations', id] });
+
   const handleShare = useCallback(async () => {
     try {
       const url = `https://culturepass.replit.app/community/${id}`;
@@ -46,14 +54,6 @@ export default function CommunityDetailScreen() {
       }
     } catch {}
   }, [id, org]);
-
-  const { data: memberships = [] } = useQuery<Membership[]>({
-    queryKey: ["/api/memberships"],
-    enabled: isAuthenticated,
-  });
-  const isJoined = memberships.some((m) => m.orgId === id);
-
-  const { data: org, isLoading } = useQuery<Organisation>({ queryKey: ['/api/organisations', id] });
   const { data: allEvents = [] } = useQuery<Event[]>({ queryKey: ['/api/events'] });
   const orgEvents = allEvents.filter(e => e.orgId === id);
 

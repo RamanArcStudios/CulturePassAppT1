@@ -28,6 +28,8 @@ export default function BusinessDetailScreen() {
   const navigation = useNavigation();
   const goBack = () => navigation.canGoBack() ? router.back() : router.replace("/");
 
+  const { data: business, isLoading } = useQuery<Business>({ queryKey: ['/api/businesses', id] });
+
   const handleShare = useCallback(async () => {
     try {
       const url = `https://culturepass.replit.app/business/${id}`;
@@ -43,8 +45,6 @@ export default function BusinessDetailScreen() {
       }
     } catch {}
   }, [id, business]);
-
-  const { data: business, isLoading } = useQuery<Business>({ queryKey: ['/api/businesses', id] });
 
   if (isLoading) {
     return (
