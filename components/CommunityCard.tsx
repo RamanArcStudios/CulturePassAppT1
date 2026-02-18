@@ -22,13 +22,14 @@ export default function CommunityCard({ org, variant = "card" }: CommunityCardPr
     return (
       <Pressable
         onPress={handlePress}
+        testID={`community-card-${org.id}`}
         style={({ pressed }) => [
           styles.listCard,
           { opacity: pressed ? 0.9 : 1 },
         ]}
       >
-        <Image source={{ uri: org.imageUrl }} style={styles.listImage} contentFit="cover" transition={200} />
-        <View style={styles.listContent}>
+        <Image source={{ uri: org.imageUrl ?? undefined }} style={styles.listImage} contentFit="cover" transition={200} />
+        <View style={styles.listContent} pointerEvents="none">
           <Text style={styles.listName} numberOfLines={1}>{org.name}</Text>
           <View style={styles.listMeta}>
             <Ionicons name="location-outline" size={12} color={Colors.light.textSecondary} />
@@ -36,10 +37,10 @@ export default function CommunityCard({ org, variant = "card" }: CommunityCardPr
           </View>
           <View style={styles.listMeta}>
             <Ionicons name="people-outline" size={12} color={Colors.light.textSecondary} />
-            <Text style={styles.listMetaText}>{org.memberCount.toLocaleString()} members</Text>
+            <Text style={styles.listMetaText}>{(org.memberCount ?? 0).toLocaleString()} members</Text>
           </View>
           <View style={styles.tagRow}>
-            {org.categories.slice(0, 3).map(c => (
+            {(org.categories ?? []).slice(0, 3).map(c => (
               <View key={c} style={styles.tag}>
                 <Text style={styles.tagText}>{c}</Text>
               </View>
@@ -54,19 +55,20 @@ export default function CommunityCard({ org, variant = "card" }: CommunityCardPr
   return (
     <Pressable
       onPress={handlePress}
+      testID={`community-card-${org.id}`}
       style={({ pressed }) => [
         styles.card,
         { transform: [{ scale: pressed ? 0.97 : 1 }] },
       ]}
     >
-      <Image source={{ uri: org.imageUrl }} style={styles.cardImage} contentFit="cover" transition={200} />
-      <View style={styles.cardContent}>
+      <Image source={{ uri: org.imageUrl ?? undefined }} style={styles.cardImage} contentFit="cover" transition={200} />
+      <View style={styles.cardContent} pointerEvents="none">
         <Text style={styles.cardName} numberOfLines={2}>{org.name}</Text>
         <View style={styles.cardMeta}>
           <Ionicons name="location-outline" size={12} color={Colors.light.textSecondary} />
           <Text style={styles.cardCity}>{org.city}</Text>
         </View>
-        <Text style={styles.cardMembers}>{org.memberCount.toLocaleString()} members</Text>
+        <Text style={styles.cardMembers}>{(org.memberCount ?? 0).toLocaleString()} members</Text>
       </View>
     </Pressable>
   );
