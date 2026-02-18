@@ -243,6 +243,7 @@ export default function DiscoverScreen() {
         if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         router.push("/map");
       }}
+      testID="map-fab-button"
     >
       <Ionicons name="map" size={22} color="#fff" />
     </Pressable>

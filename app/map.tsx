@@ -12,13 +12,14 @@ import {
 } from "react-native";
 import { router, useNavigation } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
 import { MAP_MARKER_COLORS, CATEGORY_COLORS, type Event, type Venue, type Business } from "@/lib/data";
+
+import MapViewComponent, { Marker } from "@/components/NativeMap";
 
 interface MapData {
   events: Event[];
@@ -44,7 +45,7 @@ const LAYER_CONFIG: Record<LayerType, { label: string; icon: string; color: stri
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<any>(null);
   const isWeb = Platform.OS === "web";
 
   const [activeLayers, setActiveLayers] = useState<Set<LayerType>>(
@@ -185,7 +186,7 @@ export default function MapScreen() {
           <Text style={styles.loadingText}>Loading map data...</Text>
         </View>
       ) : (
-        <MapView
+        <MapViewComponent
           ref={mapRef}
           style={styles.map}
           initialRegion={INITIAL_REGION}
@@ -229,7 +230,7 @@ export default function MapScreen() {
                 onCalloutPress={() => router.push(`/business/${biz.id}`)}
               />
             ))}
-        </MapView>
+        </MapViewComponent>
       )}
 
       <View style={[styles.topBar, { top: insets.top + 8 }]}>
