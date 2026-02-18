@@ -529,6 +529,35 @@ export default function ProfileScreen() {
       )}
 
       <View style={styles.menuSection}>
+        <Text style={styles.menuTitle}>Actions</Text>
+        <Pressable
+          onPress={() => router.push("/submit")}
+          style={({ pressed }) => [
+            styles.menuItem,
+            { opacity: pressed ? 0.7 : 1 },
+            styles.menuItemBorder,
+          ]}
+        >
+          <Ionicons name="add-circle-outline" size={20} color={Colors.light.secondary} />
+          <Text style={styles.menuLabel}>Submit a Page</Text>
+          <Ionicons name="chevron-forward" size={18} color={Colors.light.textTertiary} />
+        </Pressable>
+        {user?.roleGlobal === "admin" && (
+          <Pressable
+            onPress={() => router.push("/admin")}
+            style={({ pressed }) => [
+              styles.menuItem,
+              { opacity: pressed ? 0.7 : 1 },
+            ]}
+          >
+            <Ionicons name="shield-outline" size={20} color={Colors.light.accent} />
+            <Text style={styles.menuLabel}>Admin Dashboard</Text>
+            <Ionicons name="chevron-forward" size={18} color={Colors.light.textTertiary} />
+          </Pressable>
+        )}
+      </View>
+
+      <View style={styles.menuSection}>
         <Text style={styles.menuTitle}>Settings</Text>
         {[
           {
