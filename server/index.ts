@@ -298,7 +298,8 @@ async function initStripe() {
 
   await initStripe();
 
-  const port = parseInt(process.env.PORT || "5000", 10);
+  const isDev = process.env.NODE_ENV === "development";
+  const port = parseInt(process.env.PORT || (isDev ? "5000" : "8081"), 10);
   server.listen(
     {
       port,
@@ -306,7 +307,7 @@ async function initStripe() {
       reusePort: true,
     },
     () => {
-      log(`express server serving on port ${port}`);
+      log(`express server serving on port ${port} (${isDev ? "development" : "production"})`);
     },
   );
 })();
