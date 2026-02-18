@@ -71,6 +71,7 @@ export const organisations = pgTable("organisations", {
   categories: jsonb("categories").$type<string[]>().default([]),
   slug: text("slug"),
   status: text("status").default("active"),
+  ownerId: varchar("owner_id"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -268,6 +268,38 @@ export const storage = {
     return db.select().from(memberships).where(eq(memberships.orgId, orgId));
   },
 
+  async getAllOrganisations(): Promise<Organisation[]> {
+    return db.select().from(organisations).orderBy(desc(organisations.createdAt));
+  },
+
+  async getAllBusinesses(): Promise<Business[]> {
+    return db.select().from(businesses).orderBy(desc(businesses.createdAt));
+  },
+
+  async getAllArtists(): Promise<Artist[]> {
+    return db.select().from(artists).orderBy(desc(artists.createdAt));
+  },
+
+  async getAllEvents(): Promise<Event[]> {
+    return db.select().from(events).orderBy(desc(events.createdAt));
+  },
+
+  async getAllOrders(): Promise<Order[]> {
+    return db.select().from(orders).orderBy(desc(orders.createdAt));
+  },
+
+  async getPendingOrganisations(): Promise<Organisation[]> {
+    return db.select().from(organisations).where(eq(organisations.status, "pending")).orderBy(desc(organisations.createdAt));
+  },
+
+  async getPendingBusinesses(): Promise<Business[]> {
+    return db.select().from(businesses).where(eq(businesses.status, "pending")).orderBy(desc(businesses.createdAt));
+  },
+
+  async getPendingArtists(): Promise<Artist[]> {
+    return db.select().from(artists).where(eq(artists.status, "pending")).orderBy(desc(artists.createdAt));
+  },
+
   // CPID Lookup
   async lookupCPID(cpid: string) {
     const [result] = await db.select().from(cpids).where(eq(cpids.cpid, cpid));

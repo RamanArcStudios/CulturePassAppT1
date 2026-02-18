@@ -31,6 +31,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })
   );
 
+  // Admin middleware
+  const requireAuth = (req: Request, res: Response, next: Function) => {
+    if (!req.session.userId) return res.status(401).json({ error: "Login required" });
+    next();
+  };
+
+  const requireAdmin = async (req: Request, res: Response, next: Function) => {
+    if (!req.session.userId) return res.status(401).json({ error: "Login required" });
+    const user = await storage.getUser(req.session.userId);
+    if (!user || user.roleGlobal !== "admin") return res.status(403).json({ error: "Admin access required" });
+    next();
+  };
+
   // ── Auth ──
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
@@ -425,6 +438,180 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.lookupCPID(req.params.cpid);
       if (!result) return res.status(404).json({ error: "CPID not found" });
       res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ── Admin routes ──
+  app.get("/api/admin/stats", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.userId) return res.status(401).json({ error: "Login required" });
+      const user = await storage.getUser(req.session.userId);
+      if (!user || user.roleGlobal !== "admin") return res.status(403).json({ error: "Admin access required" });
+      
+      const allUsers = await storage.getAllUsers();
+      const allEvents = await storage.getAllEvents();
+      const allOrgs = await storage.getAllOrganisations();
+      const allBiz = await storage.getAllBusinesses();
+      const allArtists = await storage.getAllArtists();
+      const allOrders = await storage.getAllOrders();
+      const pendingOrgs = await storage.getPendingOrganisations();
+      const pendingBiz = await storage.getPendingBusinesses();
+      const pendingArtists = await storage.getPendingArtists();
+      
+      res.json({
+        users: allUsers.length,
+        events: allEvents.length,
+        organisations: allOrgs.length,
+        businesses: allBiz.length,
+        artists: allArtists.length,
+        orders: allOrders.length,
+        pendingOrganisations: pendingOrgs.length,
+        pendingBusinesses: pendingBiz.length,
+        pendingArtists: pendingArtists.length,
+        totalPending: pendingOrgs.length + pendingBiz.length + pendingArtists.length,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/admin/pending", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.userId) return res.status(401).json({ error: "Login required" });
+      const user = await storage.getUser(req.session.userId);
+      if (!user || user.roleGlobal !== "admin") return res.status(403).json({ error: "Admin access required" });
+      
+      const orgs = await storage.getPendingOrganisations();
+      const biz = await storage.getPendingBusinesses();
+      const artists = await storage.getPendingArtists();
+      
+      res.json({ organisations: orgs, businesses: biz, artists: artists });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/approve/:type/:id", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.userId) return res.status(401).json({ error: "Login required" });
+      const user = await storage.getUser(req.session.userId);
+      if (!user || user.roleGlobal !== "admin") return res.status(403).json({ error: "Admin access required" });
+      
+      const { type, id } = req.params;
+      let result;
+      if (type === "organisation") {
+        result = await storage.updateOrganisation(id, { status: "active" });
+      } else if (type === "business") {
+        result = await storage.updateBusiness(id, { status: "active" });
+      } else if (type === "artist") {
+        result = await storage.updateArtist(id, { status: "active" });
+      } else {
+        return res.status(400).json({ error: "Invalid type" });
+      }
+      if (!result) return res.status(404).json({ error: "Not found" });
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/reject/:type/:id", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.userId) return res.status(401).json({ error: "Login required" });
+      const user = await storage.getUser(req.session.userId);
+      if (!user || user.roleGlobal !== "admin") return res.status(403).json({ error: "Admin access required" });
+      
+      const { type, id } = req.params;
+      let result;
+      if (type === "organisation") {
+        result = await storage.updateOrganisation(id, { status: "rejected" });
+      } else if (type === "business") {
+        result = await storage.updateBusiness(id, { status: "rejected" });
+      } else if (type === "artist") {
+        result = await storage.updateArtist(id, { status: "rejected" });
+      } else {
+        return res.status(400).json({ error: "Invalid type" });
+      }
+      if (!result) return res.status(404).json({ error: "Not found" });
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/make-admin/:userId", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.userId) return res.status(401).json({ error: "Login required" });
+      const user = await storage.getUser(req.session.userId);
+      if (!user || user.roleGlobal !== "admin") return res.status(403).json({ error: "Admin access required" });
+      
+      const updated = await storage.updateUser(req.params.userId, { roleGlobal: "admin" });
+      if (!updated) return res.status(404).json({ error: "User not found" });
+      const { password: _, ...safeUser } = updated;
+      res.json(safeUser);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ── User Submissions (authenticated users submit pages for admin approval) ──
+  app.post("/api/submit/organisation", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.userId) return res.status(401).json({ error: "Login required" });
+      const org = await storage.createOrganisation({
+        ...req.body,
+        status: "pending",
+        ownerId: req.session.userId,
+      });
+      res.status(201).json(org);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/submit/business", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.userId) return res.status(401).json({ error: "Login required" });
+      const biz = await storage.createBusiness({
+        ...req.body,
+        status: "pending",
+        ownerId: req.session.userId,
+      });
+      res.status(201).json(biz);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/submit/artist", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.userId) return res.status(401).json({ error: "Login required" });
+      const artist = await storage.createArtist({
+        ...req.body,
+        status: "pending",
+        ownerId: req.session.userId,
+      });
+      res.status(201).json(artist);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ── Get user's own submissions ──
+  app.get("/api/my-submissions", async (req: Request, res: Response) => {
+    try {
+      if (!req.session.userId) return res.status(401).json({ error: "Login required" });
+      const allOrgs = await storage.getAllOrganisations();
+      const allBiz = await storage.getAllBusinesses();
+      const allArtists = await storage.getAllArtists();
+      
+      const myOrgs = allOrgs.filter(o => o.ownerId === req.session.userId);
+      const myBiz = allBiz.filter(b => b.ownerId === req.session.userId);
+      const myArtists = allArtists.filter(a => a.ownerId === req.session.userId);
+      
+      res.json({ organisations: myOrgs, businesses: myBiz, artists: myArtists });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }
