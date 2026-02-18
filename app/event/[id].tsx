@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback } from "react";
 import {
   View,
   Text,
@@ -18,29 +18,64 @@ import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
 import { CATEGORY_COLORS, type Event } from "@/lib/data";
-import { getSavedEventIds, toggleSaveEvent } from "@/lib/storage";
+import { useAuth } from "@/lib/auth";
+import { apiRequest, queryClient } from "@/lib/query-client";
 
 export default function EventDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
-  const [isSaved, setIsSaved] = useState(false);
+  const { user, isAuthenticated } = useAuth();
 
   const { data: event, isLoading } = useQuery<Event>({ queryKey: ['/api/events', id] });
 
-  useEffect(() => {
-    getSavedEventIds().then(ids => setIsSaved(ids.includes(id!)));
-  }, [id]);
+  const savedEventIds: string[] = user?.savedEvents ?? [];
+  const isSaved = savedEventIds.includes(id!);
 
   const handleSave = useCallback(async () => {
+    if (!isAuthenticated) {
+      router.push("/auth");
+      return;
+    }
     if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const saved = await toggleSaveEvent(id!);
-    setIsSaved(saved);
-  }, [id]);
+    try {
+      await apiRequest("POST", "/api/users/save-event", { eventId: id });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    } catch {
+      Alert.alert("Error", "Failed to save event");
+    }
+  }, [id, isAuthenticated]);
 
   const handleBook = useCallback(() => {
+    if (!isAuthenticated) {
+      router.push("/auth");
+      return;
+    }
     if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    Alert.alert("Booking", "Ticket booking will be available soon. Stay tuned!");
-  }, []);
+    Alert.alert(
+      "Book Tickets",
+      `Confirm booking for ${event?.title}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Confirm",
+          onPress: async () => {
+            try {
+              await apiRequest("POST", "/api/orders", {
+                eventId: id,
+                quantity: 1,
+                totalPrice: event?.price || 0,
+                status: "confirmed",
+              });
+              queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+              Alert.alert("Success", "Ticket booked successfully!");
+            } catch {
+              Alert.alert("Error", "Failed to book ticket");
+            }
+          },
+        },
+      ]
+    );
+  }, [id, event, isAuthenticated]);
 
   if (isLoading) return <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><ActivityIndicator size="large" color={Colors.light.primary} /></View>;
 

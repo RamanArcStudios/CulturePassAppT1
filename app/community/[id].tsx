@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
   View,
   Text,
@@ -18,11 +18,20 @@ import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
 import EventCard from "@/components/EventCard";
-import type { Organisation, Event } from "@/lib/data";
+import type { Organisation, Event, Membership } from "@/lib/data";
+import { useAuth } from "@/lib/auth";
+import { apiRequest, queryClient } from "@/lib/query-client";
 
 export default function CommunityDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
+  const { isAuthenticated } = useAuth();
+
+  const { data: memberships = [] } = useQuery<Membership[]>({
+    queryKey: ["/api/memberships"],
+    enabled: isAuthenticated,
+  });
+  const isJoined = memberships.some((m) => m.orgId === id);
 
   const { data: org, isLoading } = useQuery<Organisation>({ queryKey: ['/api/organisations', id] });
   const { data: allEvents = [] } = useQuery<Event[]>({ queryKey: ['/api/events'] });
@@ -108,24 +117,42 @@ export default function CommunityDetailScreen() {
         <Text style={styles.sectionTitle}>About</Text>
         <Text style={styles.description}>{org.description}</Text>
 
-        <Pressable
-          onPress={() => {
-            if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            Alert.alert("Join Community", "Community membership will be available soon!");
-          }}
-          style={({ pressed }) => [
-            styles.joinBtn,
-            { transform: [{ scale: pressed ? 0.97 : 1 }] },
-          ]}
-        >
-          <LinearGradient
-            colors={[Colors.light.secondary, Colors.light.secondaryLight]}
-            style={styles.joinBtnGradient}
+        {isJoined ? (
+          <View style={styles.joinedBadge}>
+            <Ionicons name="checkmark-circle" size={20} color={Colors.light.success} />
+            <Text style={styles.joinedText}>Member</Text>
+          </View>
+        ) : (
+          <Pressable
+            onPress={async () => {
+              if (!isAuthenticated) {
+                router.push("/auth");
+                return;
+              }
+              if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              try {
+                await apiRequest("POST", "/api/memberships", { orgId: id });
+                queryClient.invalidateQueries({ queryKey: ["/api/memberships"] });
+                queryClient.invalidateQueries({ queryKey: ["/api/organisations", id] });
+                Alert.alert("Joined!", `You are now a member of ${org.name}`);
+              } catch {
+                Alert.alert("Error", "Failed to join community");
+              }
+            }}
+            style={({ pressed }) => [
+              styles.joinBtn,
+              { transform: [{ scale: pressed ? 0.97 : 1 }] },
+            ]}
           >
-            <Ionicons name="people" size={18} color="#fff" />
-            <Text style={styles.joinBtnText}>Join Community</Text>
-          </LinearGradient>
-        </Pressable>
+            <LinearGradient
+              colors={[Colors.light.secondary, Colors.light.secondaryLight]}
+              style={styles.joinBtnGradient}
+            >
+              <Ionicons name="people" size={18} color="#fff" />
+              <Text style={styles.joinBtnText}>Join Community</Text>
+            </LinearGradient>
+          </Pressable>
+        )}
 
         {orgEvents.length > 0 && (
           <>
@@ -258,6 +285,23 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontFamily: "Poppins_700Bold",
+  },
+  joinedBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 20,
+    paddingVertical: 14,
+    borderRadius: 16,
+    backgroundColor: Colors.light.success + "12",
+    borderWidth: 1,
+    borderColor: Colors.light.success + "30",
+  },
+  joinedText: {
+    fontSize: 16,
+    fontFamily: "Poppins_700Bold",
+    color: Colors.light.success,
   },
   notFound: {
     flex: 1,

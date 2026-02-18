@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Platform,
   RefreshControl,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -29,14 +30,14 @@ import {
   type Organisation,
   type Artist,
 } from "@/lib/data";
-import { getSavedEventIds, toggleSaveEvent } from "@/lib/storage";
-import { queryClient } from "@/lib/query-client";
+import { useAuth } from "@/lib/auth";
+import { apiRequest, queryClient } from "@/lib/query-client";
 
 export default function DiscoverScreen() {
   const insets = useSafeAreaInsets();
+  const { user, isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<EventCategory | null>(null);
-  const [savedEvents, setSavedEvents] = useState<string[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
   const { data: allEvents = [], isLoading: loadingEvents } = useQuery<Event[]>({ queryKey: ['/api/events'] });
@@ -47,24 +48,26 @@ export default function DiscoverScreen() {
 
   const organisations = allOrganisations.slice(0, 5);
 
-  useEffect(() => {
-    getSavedEventIds().then(setSavedEvents);
-  }, []);
+  const savedEventIds: string[] = user?.savedEvents ?? [];
 
   const handleSave = useCallback(async (id: string) => {
-    const isSaved = await toggleSaveEvent(id);
-    setSavedEvents(prev =>
-      isSaved ? [...prev, id] : prev.filter(e => e !== id)
-    );
-  }, []);
+    if (!isAuthenticated) {
+      router.push("/auth");
+      return;
+    }
+    if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      await apiRequest("POST", "/api/users/save-event", { eventId: id });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    } catch (err: any) {
+      Alert.alert("Error", "Failed to save event");
+    }
+  }, [isAuthenticated]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     queryClient.invalidateQueries().then(() => {
-      getSavedEventIds().then(ids => {
-        setSavedEvents(ids);
-        setRefreshing(false);
-      });
+      setRefreshing(false);
     });
   }, []);
 
@@ -141,7 +144,7 @@ export default function DiscoverScreen() {
               event={event}
               variant="list"
               onSave={handleSave}
-              isSaved={savedEvents.includes(event.id)}
+              isSaved={savedEventIds.includes(event.id)}
             />
           ))}
           {filteredEvents.length === 0 && (
@@ -225,7 +228,7 @@ export default function DiscoverScreen() {
                 event={event}
                 variant="list"
                 onSave={handleSave}
-                isSaved={savedEvents.includes(event.id)}
+                isSaved={savedEventIds.includes(event.id)}
               />
             ))}
           </View>
