@@ -20,12 +20,37 @@ export interface Event {
   ticketsSold: number | null;
   artistId: string | null;
   country: string | null;
+  venueId: string | null;
+  lat: number | null;
+  lng: number | null;
   cpid: string | null;
   published: boolean | null;
   createdAt: string | null;
 }
 
 export type EventCategory = "Music" | "Dance" | "Festival" | "Food" | "Theatre" | "Film" | "Cultural" | "Sports" | "Literature" | "Workshop";
+
+export interface Venue {
+  id: string;
+  name: string;
+  address: string;
+  country: string;
+  state: string;
+  city: string;
+  lat: number;
+  lng: number;
+  capacity: number | null;
+  venueType: string;
+  amenities: string[] | null;
+  images: string[] | null;
+  contact: string | null;
+  phone: string | null;
+  website: string | null;
+  description: string | null;
+  approved: boolean | null;
+  cpid: string | null;
+  createdAt: string | null;
+}
 
 export interface Organisation {
   id: string;
@@ -47,12 +72,16 @@ export interface Business {
   category: string;
   city: string;
   state: string;
+  country: string | null;
   phone: string | null;
   website: string | null;
   imageUrl: string | null;
   cpid: string | null;
   rating: number | null;
   isSponsor: boolean | null;
+  lat: number | null;
+  lng: number | null;
+  serviceLocations: string[] | null;
 }
 
 export interface Artist {
@@ -106,6 +135,8 @@ export interface UserProfile {
   email: string | null;
   city: string | null;
   state: string | null;
+  country: string | null;
+  phone: string | null;
   cpid: string | null;
   savedEvents: string[] | null;
   memberOf: string[] | null;
@@ -142,7 +173,38 @@ export const CATEGORY_COLORS: Record<string, string> = {
   Workshop: "#2ECC71",
 };
 
+export const VENUE_TYPES = [
+  "Community Hall",
+  "Convention Centre",
+  "Temple",
+  "Church",
+  "Mosque",
+  "Theatre",
+  "Stadium",
+  "Outdoor Park",
+  "Function Centre",
+];
+
 export const AUSTRALIAN_CITIES = [
   "Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide",
   "Gold Coast", "Canberra", "Hobart", "Darwin",
 ];
+
+export const NZ_CITIES = [
+  "Auckland", "Wellington", "Christchurch", "Hamilton", "Dunedin",
+];
+
+export const MAP_MARKER_COLORS: Record<string, string> = {
+  Festival: "#FF8C00",
+  Music: "#8B5CF6",
+  Cultural: "#D4A017",
+  Workshop: "#22C55E",
+  Dance: "#9B59B6",
+  Food: "#E67E22",
+  Theatre: "#1A535C",
+  Film: "#3498DB",
+  Sports: "#E74C3C",
+  Literature: "#27AE60",
+  venue: "#1A535C",
+  business: "#3B82F6",
+};

@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "node:http";
 import { storage } from "./storage";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import session from "express-session";
 import pgSession from "connect-pg-simple";
 import pg from "pg";
@@ -48,7 +49,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ── Auth ──
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
-      const { username, password, name, email, city, state } = req.body;
+      const { username, password, name, email, city, state, country, phone } = req.body;
       if (!username || !password) return res.status(400).json({ error: "Username and password required" });
 
       const existing = await storage.getUserByUsername(username);
@@ -62,6 +63,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email: email || "",
         city: city || "Sydney",
         state: state || "NSW",
+        country: country || "Australia",
+        phone: phone || "",
       });
 
       req.session.userId = user.id;
@@ -432,8 +435,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/users/profile", async (req: Request, res: Response) => {
     try {
       if (!req.session.userId) return res.status(401).json({ error: "Login required" });
-      const { name, email, city, state } = req.body;
-      const updated = await storage.updateUser(req.session.userId, { name, email, city, state });
+      const { name, email, city, state, country, phone } = req.body;
+      const updateData: any = { name, email, city, state };
+      if (country !== undefined) updateData.country = country;
+      if (phone !== undefined) updateData.phone = phone;
+      const updated = await storage.updateUser(req.session.userId, updateData);
       if (!updated) return res.status(404).json({ error: "User not found" });
       const { password: _, ...safeUser } = updated;
       res.json(safeUser);
@@ -745,6 +751,160 @@ export async function registerRoutes(app: Express): Promise<Server> {
         <p style="color:#6B6B6F">No charges were made. You can close this window and return to the app.</p>
       </div>
     </body></html>`);
+  });
+
+  // ── Venues ──
+  app.get("/api/venues", async (_req: Request, res: Response) => {
+    try {
+      const venuesList = await storage.getVenues();
+      res.json(venuesList);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/venues/:id", async (req: Request, res: Response) => {
+    try {
+      const venue = await storage.getVenueById(req.params.id);
+      if (!venue) return res.status(404).json({ error: "Venue not found" });
+      res.json(venue);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/venues/:id/events", async (req: Request, res: Response) => {
+    try {
+      const eventsList = await storage.getEventsByVenue(req.params.id);
+      res.json(eventsList);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/venues", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const venue = await storage.createVenue(req.body);
+      res.status(201).json(venue);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.put("/api/venues/:id", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const venue = await storage.updateVenue(req.params.id, req.body);
+      if (!venue) return res.status(404).json({ error: "Venue not found" });
+      res.json(venue);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ── Map Data ──
+  app.get("/api/map/data", async (_req: Request, res: Response) => {
+    try {
+      const data = await storage.getMapData();
+      res.json(data);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // ── Forgot Password / Reset ──
+  app.post("/api/auth/forgot-password", async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+      if (!email) return res.status(400).json({ error: "Email is required" });
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.json({ message: "If that email exists, a reset link has been sent." });
+      }
+
+      const token = crypto.randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+      await storage.createPasswordResetToken(user.id, token, expiresAt);
+
+      const baseUrl = `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
+      const resetUrl = `${baseUrl}/api/auth/reset-password-page?token=${token}`;
+
+      console.log(`[Password Reset] Token for ${email}: ${token}`);
+      console.log(`[Password Reset] URL: ${resetUrl}`);
+
+      res.json({ message: "If that email exists, a reset link has been sent." });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/auth/reset-password-page", async (req: Request, res: Response) => {
+    const token = req.query.token as string;
+    if (!token) return res.status(400).send("Missing token");
+
+    const record = await storage.getPasswordResetToken(token);
+    if (!record) {
+      return res.send(`<html><body style="font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#FAFAF8">
+        <div style="text-align:center;padding:40px">
+          <h1 style="color:#E2725B">Link Expired</h1>
+          <p style="color:#6B6B6F">This reset link has expired or already been used. Please request a new one.</p>
+        </div></body></html>`);
+    }
+
+    res.send(`<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+      <body style="font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#FAFAF8">
+      <div style="max-width:400px;width:100%;padding:40px">
+        <h1 style="color:#1A535C;margin-bottom:24px">Reset Password</h1>
+        <form method="POST" action="/api/auth/reset-password">
+          <input type="hidden" name="token" value="${token}" />
+          <div style="margin-bottom:16px">
+            <label style="display:block;margin-bottom:4px;color:#6B6B6F;font-size:14px">New Password</label>
+            <input type="password" name="password" required minlength="6" style="width:100%;padding:12px;border:1px solid #E8E6E1;border-radius:10px;font-size:16px;box-sizing:border-box" />
+          </div>
+          <div style="margin-bottom:24px">
+            <label style="display:block;margin-bottom:4px;color:#6B6B6F;font-size:14px">Confirm Password</label>
+            <input type="password" name="confirmPassword" required minlength="6" style="width:100%;padding:12px;border:1px solid #E8E6E1;border-radius:10px;font-size:16px;box-sizing:border-box" />
+          </div>
+          <button type="submit" style="width:100%;padding:14px;background:#1A535C;color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer;font-weight:600">Reset Password</button>
+        </form>
+      </div></body></html>`);
+  });
+
+  app.post("/api/auth/reset-password", async (req: Request, res: Response) => {
+    try {
+      const { token, password, confirmPassword } = req.body;
+      if (!token || !password) return res.status(400).json({ error: "Token and password required" });
+      if (password !== confirmPassword) {
+        return res.send(`<html><body style="font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#FAFAF8">
+          <div style="text-align:center;padding:40px">
+            <h1 style="color:#E2725B">Passwords Don't Match</h1>
+            <p style="color:#6B6B6F">Please go back and try again.</p>
+            <a href="javascript:history.back()" style="color:#1A535C">Go Back</a>
+          </div></body></html>`);
+      }
+
+      const record = await storage.getPasswordResetToken(token);
+      if (!record) {
+        return res.send(`<html><body style="font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#FAFAF8">
+          <div style="text-align:center;padding:40px">
+            <h1 style="color:#E2725B">Link Expired</h1>
+            <p style="color:#6B6B6F">This reset link has expired or already been used.</p>
+          </div></body></html>`);
+      }
+
+      const hashed = await bcrypt.hash(password, 10);
+      await storage.updateUser(record.userId, { password: hashed });
+      await storage.markTokenUsed(record.id);
+
+      res.send(`<html><body style="font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#FAFAF8">
+        <div style="text-align:center;padding:40px">
+          <div style="font-size:64px;margin-bottom:16px;color:#34C759">&#10003;</div>
+          <h1 style="color:#1A535C">Password Reset!</h1>
+          <p style="color:#6B6B6F">Your password has been updated. You can now log in with your new password in the app.</p>
+        </div></body></html>`);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   });
 
   // ── Health ──

@@ -8,6 +8,7 @@ import {
   real,
   timestamp,
   jsonb,
+  doublePrecision,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -22,6 +23,9 @@ export const users = pgTable("users", {
   email: text("email").default(""),
   city: text("city").default("Sydney"),
   state: text("state").default("NSW"),
+  country: text("country").default("Australia"),
+  phone: text("phone").default(""),
+  phoneVerified: boolean("phone_verified").default(false),
   cpid: text("cpid").unique(),
   savedEvents: jsonb("saved_events").$type<string[]>().default([]),
   memberOf: jsonb("member_of").$type<string[]>().default([]),
@@ -54,6 +58,33 @@ export const events = pgTable("events", {
   ticketsSold: integer("tickets_sold").default(0),
   artistId: varchar("artist_id"),
   country: text("country").default("Australia"),
+  venueId: varchar("venue_id"),
+  lat: doublePrecision("lat"),
+  lng: doublePrecision("lng"),
+  cpid: text("cpid").unique(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const venues = pgTable("venues", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  address: text("address").notNull(),
+  country: text("country").notNull().default("Australia"),
+  state: text("state").notNull(),
+  city: text("city").notNull(),
+  lat: doublePrecision("lat").notNull(),
+  lng: doublePrecision("lng").notNull(),
+  capacity: integer("capacity"),
+  venueType: text("venue_type").notNull().default("hall"),
+  amenities: jsonb("amenities").$type<string[]>().default([]),
+  images: jsonb("images").$type<string[]>().default([]),
+  contact: text("contact").default(""),
+  phone: text("phone").default(""),
+  website: text("website").default(""),
+  description: text("description").default(""),
+  approved: boolean("approved").default(true),
   cpid: text("cpid").unique(),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -86,6 +117,7 @@ export const businesses = pgTable("businesses", {
   category: text("category").notNull(),
   city: text("city").notNull(),
   state: text("state").notNull(),
+  country: text("country").default("Australia"),
   phone: text("phone").default(""),
   website: text("website").default(""),
   imageUrl: text("image_url").default(""),
@@ -94,6 +126,9 @@ export const businesses = pgTable("businesses", {
   ownerId: varchar("owner_id"),
   status: text("status").default("active"),
   isSponsor: boolean("is_sponsor").default(false),
+  lat: doublePrecision("lat"),
+  lng: doublePrecision("lng"),
+  serviceLocations: jsonb("service_locations").$type<string[]>().default([]),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -157,6 +192,17 @@ export const memberships = pgTable("memberships", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const cpids = pgTable("cpids", {
   cpid: text("cpid").primaryKey(),
   entityType: text("entity_type").notNull(),
@@ -171,9 +217,17 @@ export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   city: true,
   state: true,
+  country: true,
+  phone: true,
 });
 
 export const insertEventSchema = createInsertSchema(events).omit({
+  id: true,
+  cpid: true,
+  createdAt: true,
+});
+
+export const insertVenueSchema = createInsertSchema(venues).omit({
   id: true,
   cpid: true,
   createdAt: true,
@@ -216,6 +270,8 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Event = typeof events.$inferSelect;
 export type InsertEvent = z.infer<typeof insertEventSchema>;
+export type Venue = typeof venues.$inferSelect;
+export type InsertVenue = z.infer<typeof insertVenueSchema>;
 export type Organisation = typeof organisations.$inferSelect;
 export type InsertOrganisation = z.infer<typeof insertOrganisationSchema>;
 export type Business = typeof businesses.$inferSelect;

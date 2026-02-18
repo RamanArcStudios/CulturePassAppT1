@@ -1,0 +1,306 @@
+Perfect. Now we’re adding **geographic intelligence** to CulturePass.
+This turns it from a listings app into a **live cultural map of Australia & New Zealand**.
+
+Let’s design this properly.
+
+---
+
+# 🗺 1️⃣ Clickable Map System (Core Experience)
+
+At the top of the app:
+
+Header:
+[ 🔍 Search ]   [ 📍 Map ]   [ 🔔 ]   [ Profile ]
+
+When user taps **📍 Map**, it opens:
+
+## 🌍 Live Culture Map View
+
+Layers toggle:
+
+* Events
+* Venues
+* Businesses
+* Services
+* Communities
+* Artists
+
+Each with different marker colors.
+
+---
+
+## 🇦🇺 Australia & 🇳🇿 New Zealand Base Coverage
+
+![Image](https://images.openai.com/static-rsc-3/11dfqGl-psm0ecoyhhlf-Vm8j_eThHkvP_ojyVnKn6tQ5Cxe9hCzDr9lzPWzUUaSKi5bURF5Rd6laGu-qN708qRJgb94HRfPn9MlB_KebuE?purpose=fullsize\&v=1)
+
+![Image](https://images.openai.com/static-rsc-3/rIYHVjS98IwcgD3sb44i4Dq70kAaM8oye1JKT2l6OxKJfalObyXh4AnMkQuOHal28WLrjQTcxjHjze0LYJE1-1ZrW9esYNZeDgn3wXq-AAw?purpose=fullsize\&v=1)
+
+![Image](https://images.openai.com/static-rsc-3/jt7bxbn1MS-xnTRKeKT6LRv4616pG6v3c1xcJrYqXamR06nO7ia4XO-CzcmXRsKEM9NLNSvwWdoQ2n0E6NeBT_jcsi1yS8m9PfEJjSWFqYs?purpose=fullsize\&v=1)
+
+![Image](https://images.openai.com/static-rsc-3/ItOouFt8kmzILdOmn-098zL3cdVeiHenMZ-1r7EDIJeLwJrwTAt9IBwNwNfW-SvxPrDcpPI8U636JtQNL9pDhUBk2B0Og7bONHYLanqRaqI?purpose=fullsize\&v=1)
+
+We support:
+
+* All AU states (NSW, VIC, QLD, WA, SA, TAS, ACT, NT)
+* All NZ regions (Auckland, Wellington, Christchurch + others)
+
+Markers load dynamically based on zoom.
+
+---
+
+# 📍 2️⃣ Venues System (New Core Collection)
+
+New collection:
+
+```
+venues
+  name
+  address
+  country
+  state
+  city
+  lat
+  lng
+  capacity
+  venue_type (hall, temple, church, theatre, outdoor park, stadium, function centre)
+  amenities
+  images
+  contact
+  approved (true/false)
+```
+
+---
+
+## Venue Page Shows:
+
+* Gallery
+* Upcoming events at this venue
+* Businesses servicing this venue
+* Availability calendar (future phase)
+* Directions button (Google / Apple Maps)
+
+---
+
+# 🎪 3️⃣ Show All Events On Map
+
+Each event stores:
+
+```
+event_location:
+  venue_id (optional)
+  lat
+  lng
+```
+
+On Map:
+
+* Tap marker → mini card appears
+* Swipe up → event detail
+
+Marker Colors:
+
+* Festival = Orange
+* Concert = Purple
+* Religious = Gold
+* Business networking = Blue
+* Workshop = Green
+
+---
+
+# 🏢 4️⃣ Show Businesses On Map
+
+Business entity must store:
+
+```
+service_locations:
+  [NSW, VIC]
+base_location:
+  lat
+  lng
+```
+
+When user toggles “Businesses” layer:
+Markers show:
+
+* Catering
+* Sound & Lighting
+* Decor
+* Photography
+* Security
+* Performers
+
+Tap → Business mini profile → View Services
+
+---
+
+# 🛠 5️⃣ Show Services on Map
+
+If business marks:
+“Available for this Event”
+
+Then inside event page:
+Nearby Services Section:
+
+Example:
+Catering (5 available nearby)
+Sound & Lighting (3 nearby)
+
+User can filter:
+“Show services within 10km”
+
+---
+
+# 🔎 6️⃣ Map Filters (Advanced)
+
+On Map top bar:
+
+* Date
+* Culture
+* Event Type
+* Free Only
+* Verified Only
+* Radius slider (5km – 100km)
+
+Clustering enabled:
+Zoomed out → grouped bubbles
+Zoomed in → individual markers
+
+---
+
+# 🔐 7️⃣ Forgot Password + Reset Flow
+
+Login screen includes:
+
+Forgot Password?
+
+Flow:
+
+1. Enter email
+2. Receive reset link
+3. Secure token (15 min expiry)
+4. Create new password
+5. Force logout of all sessions
+
+If mobile registered:
+Option:
+Reset via OTP SMS
+
+---
+
+# 📱 8️⃣ Mandatory Mobile Number + Country
+
+During sign-up:
+
+Required:
+
+* Country dropdown
+* Mobile number
+* OTP verification
+
+Store:
+
+```
+users:
+  country
+  phone
+  phone_verified: true/false
+```
+
+Benefits:
+
+* SMS event reminders
+* Fraud reduction
+* Ticket verification
+* Geo-targeting
+
+---
+
+# 📍 9️⃣ Map Button on Top (UX)
+
+Top Navigation:
+
+Desktop:
+[ Events ] [ Map ] [ Businesses ] [ Communities ] [ Artists ]
+
+Mobile:
+Floating Map Button
+OR
+Toggle between List / Map
+
+Sticky top map switch improves discovery.
+
+---
+
+# 🏟 10️⃣ Example Venue Types (AU/NZ Focus)
+
+![Image](https://www.sydneyolympicpark.nsw.gov.au/sites/default/files/2023-10/venue-sydney-showground-1200x630px.jpg)
+
+![Image](https://images.openai.com/static-rsc-3/4jdCGt9qw5apOnP-CRlWcI674v6mFIQHBeR1FfQ-AxAWDMqIiY7ZIWNIHGa54NOPkGGVbOZTWSdj6jJYCL4A9SlXOrNjv2GtIUNZ8Nq7UnE?purpose=fullsize\&v=1)
+
+![Image](https://cdn.aucklandunlimited.com/live/assets/media/greathall-gallery1.jpg)
+
+![Image](https://cdn.aucklandunlimited.com/live/assets/media/greathall-gallery5.jpg)
+
+Venue Types:
+
+* Community Hall
+* Convention Centre
+* Temple
+* Church
+* Mosque
+* Theatre
+* Stadium
+* Outdoor Park
+* Function Centre
+
+---
+
+# 🧠 Backend Additions
+
+New Collections:
+
+venues
+venue_availability
+map_clusters_cache
+password_reset_tokens
+sms_verification_codes
+
+---
+
+# 🔒 Security Notes
+
+* Rate limit OTP requests
+* Encrypt phone numbers
+* Hash reset tokens
+* Geo index on lat/lng
+* Role check before adding venue
+
+---
+
+# 💡 Strategic Advantage
+
+When map works properly:
+
+User opens app →
+Sees:
+“Indian Classical Concert 3km away”
+“Malayalam Business Meetup 5km away”
+“Chinese New Year Festival 8km away”
+
+This creates:
+Spontaneous discovery.
+Hyperlocal engagement.
+Daily usage.
+
+---
+
+# 🚀 Now Big Question
+
+Do we:
+
+A) Architect Map Database + Geo-indexing properly
+B) Design Ticket QR + Check-in system
+C) Design Venue booking engine
+D) Build Full Technical Infrastructure Diagram (Firebase + Stripe + Maps + CDN)
+
+Choose wisely. This step determines scalability.

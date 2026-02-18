@@ -1,19 +1,23 @@
-import { eq, desc, and, ilike, sql } from "drizzle-orm";
+import { eq, desc, and, ilike, sql, gte } from "drizzle-orm";
 import { db } from "./db";
 import {
   users,
   events,
+  venues,
   organisations,
   businesses,
   artists,
   perks,
   orders,
   memberships,
+  passwordResetTokens,
   cpids,
   type User,
   type InsertUser,
   type Event,
   type InsertEvent,
+  type Venue,
+  type InsertVenue,
   type Organisation,
   type InsertOrganisation,
   type Business,
@@ -42,7 +46,6 @@ async function registerCPID(cpid: string, entityType: string, entityId: string) 
 }
 
 export const storage = {
-  // Users
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
@@ -50,6 +53,11 @@ export const storage = {
 
   async getUserByUsername(username: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  },
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
     return user;
   },
 
@@ -69,16 +77,12 @@ export const storage = {
     return db.select().from(users).orderBy(desc(users.createdAt));
   },
 
-  // Events
   async getEvents(opts?: { category?: string; city?: string; featured?: boolean; search?: string }): Promise<Event[]> {
-    let query = db.select().from(events).where(eq(events.published, true));
     const conditions: any[] = [eq(events.published, true)];
-
     if (opts?.category) conditions.push(eq(events.category, opts.category));
     if (opts?.city) conditions.push(eq(events.city, opts.city));
     if (opts?.featured) conditions.push(eq(events.featured, true));
     if (opts?.search) conditions.push(ilike(events.title, `%${opts.search}%`));
-
     return db.select().from(events).where(and(...conditions)).orderBy(events.date);
   },
 
@@ -119,6 +123,49 @@ export const storage = {
   async deleteEvent(id: string): Promise<boolean> {
     const result = await db.delete(events).where(eq(events.id, id)).returning();
     return result.length > 0;
+  },
+
+  async getEventsWithCoords(): Promise<Event[]> {
+    return db.select().from(events).where(
+      and(eq(events.published, true), sql`${events.lat} IS NOT NULL AND ${events.lng} IS NOT NULL`)
+    ).orderBy(events.date);
+  },
+
+  async getEventsByVenue(venueId: string): Promise<Event[]> {
+    return db.select().from(events).where(
+      and(eq(events.published, true), eq(events.venueId, venueId))
+    ).orderBy(events.date);
+  },
+
+  // Venues
+  async getVenues(): Promise<Venue[]> {
+    return db.select().from(venues).where(eq(venues.approved, true)).orderBy(venues.name);
+  },
+
+  async getVenueById(id: string): Promise<Venue | undefined> {
+    const [venue] = await db.select().from(venues).where(eq(venues.id, id));
+    return venue;
+  },
+
+  async createVenue(data: InsertVenue): Promise<Venue> {
+    const cpid = generateCPID("CP-V-");
+    const [venue] = await db.insert(venues).values({ ...data, cpid }).returning();
+    await registerCPID(cpid, "venue", venue.id);
+    return venue;
+  },
+
+  async updateVenue(id: string, data: Partial<Venue>): Promise<Venue | undefined> {
+    const [venue] = await db.update(venues).set(data).where(eq(venues.id, id)).returning();
+    return venue;
+  },
+
+  async deleteVenue(id: string): Promise<boolean> {
+    const result = await db.delete(venues).where(eq(venues.id, id)).returning();
+    return result.length > 0;
+  },
+
+  async getAllVenues(): Promise<Venue[]> {
+    return db.select().from(venues).orderBy(desc(venues.createdAt));
   },
 
   // Organisations
@@ -173,6 +220,12 @@ export const storage = {
   async deleteBusiness(id: string): Promise<boolean> {
     const result = await db.delete(businesses).where(eq(businesses.id, id)).returning();
     return result.length > 0;
+  },
+
+  async getBusinessesWithCoords(): Promise<Business[]> {
+    return db.select().from(businesses).where(
+      and(eq(businesses.status, "active"), sql`${businesses.lat} IS NOT NULL AND ${businesses.lng} IS NOT NULL`)
+    ).orderBy(businesses.name);
   },
 
   // Artists
@@ -277,6 +330,32 @@ export const storage = {
     return db.select().from(memberships).where(eq(memberships.orgId, orgId));
   },
 
+  // Password Reset Tokens
+  async createPasswordResetToken(userId: string, token: string, expiresAt: Date) {
+    const [result] = await db.insert(passwordResetTokens).values({
+      userId,
+      token,
+      expiresAt,
+    }).returning();
+    return result;
+  },
+
+  async getPasswordResetToken(token: string) {
+    const [result] = await db.select().from(passwordResetTokens).where(
+      and(
+        eq(passwordResetTokens.token, token),
+        eq(passwordResetTokens.used, false),
+        gte(passwordResetTokens.expiresAt, new Date())
+      )
+    );
+    return result;
+  },
+
+  async markTokenUsed(id: string) {
+    await db.update(passwordResetTokens).set({ used: true }).where(eq(passwordResetTokens.id, id));
+  },
+
+  // Admin helpers
   async getAllOrganisations(): Promise<Organisation[]> {
     return db.select().from(organisations).orderBy(desc(organisations.createdAt));
   },
@@ -313,5 +392,19 @@ export const storage = {
   async lookupCPID(cpid: string) {
     const [result] = await db.select().from(cpids).where(eq(cpids.cpid, cpid));
     return result;
+  },
+
+  // Map data - all points for map display
+  async getMapData() {
+    const [evts, vens, bizs] = await Promise.all([
+      db.select().from(events).where(
+        and(eq(events.published, true), sql`${events.lat} IS NOT NULL`)
+      ),
+      db.select().from(venues).where(eq(venues.approved, true)),
+      db.select().from(businesses).where(
+        and(eq(businesses.status, "active"), sql`${businesses.lat} IS NOT NULL`)
+      ),
+    ]);
+    return { events: evts, venues: vens, businesses: bizs };
   },
 };
