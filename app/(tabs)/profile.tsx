@@ -534,22 +534,22 @@ export default function ProfileScreen() {
           {
             icon: "notifications-outline",
             label: "Notifications",
-            action: () => {},
+            action: () => router.push("/settings/notifications"),
           },
           {
             icon: "shield-checkmark-outline",
             label: "Privacy",
-            action: () => {},
+            action: () => router.push("/settings/privacy"),
           },
           {
             icon: "help-circle-outline",
             label: "Help & Support",
-            action: () => {},
+            action: () => router.push("/settings/help"),
           },
           {
             icon: "information-circle-outline",
             label: "About CulturePass",
-            action: () => {},
+            action: () => router.push("/settings/about"),
           },
         ].map((item, idx, arr) => (
           <Pressable

@@ -51,6 +51,22 @@ function RootLayoutNav() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="settings/notifications"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="settings/privacy"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="settings/help"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="settings/about"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

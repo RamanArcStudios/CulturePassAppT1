@@ -1,0 +1,332 @@
+Bibin… we’re not choosing randomly.
+
+We lock **D) Role & Permission Matrix** first.
+
+If permissions are weak, everything collapses — fraud, chaos, ticket abuse, fake entities, revenue leakage.
+
+So let’s architect it properly.
+
+---
+
+# 🧩 CULTUREPASS – ROLE & PERMISSION MATRIX (FOUNDATION)
+
+We design this in **3 layers**:
+
+1. Platform Level (Global)
+2. Entity Level (Per Community/Business/etc.)
+3. Event Level (Per Event)
+
+---
+
+# 🌍 1️⃣ Platform-Level Roles
+
+These apply to the entire system.
+
+## 👤 User (Default)
+
+Can:
+
+* Browse events
+* Buy tickets
+* Follow entities
+* Join communities
+* Save filters
+* Receive perks
+
+Cannot:
+
+* Create entities
+* Create events (unless entity approved)
+
+---
+
+## 🛡 Moderator (Platform Moderator)
+
+Can:
+
+* Flag content
+* Suspend comments
+* Report entities
+* Review reported events
+
+Cannot:
+
+* Approve entities
+* Access financial dashboards
+
+---
+
+## 👑 SuperAdmin (Mission Control)
+
+Full power.
+
+Can:
+
+* Approve/reject/suspend entities
+* Edit any entity
+* Override ticketing
+* Issue refunds
+* Manage platform fees
+* View financial reports
+* Manage sponsor placements
+* Access audit logs
+* Change global settings
+* Ban users
+
+This role must be:
+
+* Very limited
+* 2FA mandatory
+* Full audit logging
+
+---
+
+# 🏢 2️⃣ Entity-Level Roles
+
+Each Community / Organisation / Business / Artist has its own team.
+
+Every entity must have:
+
+## 🧑‍💼 Owner
+
+* Created the entity
+* Can transfer ownership
+* Delete entity (with SuperAdmin review)
+* Assign roles
+* Access full financial dashboard
+
+Only 1 Owner.
+
+---
+
+## 🧑‍💼 Admin
+
+* Edit entity profile
+* Add/remove team members
+* Create events
+* Create services (if Business)
+* Add sponsors
+* Create perks
+
+Cannot:
+
+* Transfer ownership
+* Delete entity
+
+---
+
+## 🎟 Event Manager
+
+* Create/edit events
+* Manage tickets
+* Check-in attendees
+* Download attendee list
+
+Cannot:
+
+* Access revenue payouts
+* Edit entity core details
+
+---
+
+## 💰 Finance Manager
+
+* View revenue
+* Download payout reports
+* Process refunds (within limits)
+
+Cannot:
+
+* Edit event content
+* Edit entity profile
+
+---
+
+## ✍ Content Editor
+
+* Edit description
+* Update images
+* Post announcements
+
+Cannot:
+
+* Create tickets
+* Access finances
+
+---
+
+# 🎫 3️⃣ Event-Level Permissions
+
+Even inside an event, permissions matter.
+
+Event Manager can:
+
+* Add ticket types
+* Set price
+* View attendees
+
+Finance Manager can:
+
+* See revenue numbers
+* Approve refunds
+
+Owner/Admin can:
+
+* Override everything
+
+---
+
+# 🔐 Permission Control Logic (Firestore Example)
+
+entity_roles collection:
+
+```
+entity_roles
+  entity_id
+  user_id
+  role: owner | admin | event_manager | finance_manager | content_editor
+```
+
+Check rule example:
+
+To create event:
+
+* entity.status == "approved"
+* user has role in entity_roles
+* role in [owner, admin, event_manager]
+
+To access financial dashboard:
+
+* role in [owner, finance_manager, admin]
+
+To approve entity:
+
+* platform_role == superadmin
+
+Everything rule-based.
+No shortcuts.
+
+---
+
+# 📜 Approval Workflow Logic (Tight System)
+
+When new entity created:
+
+status = pending
+visibility = hidden
+events_disabled = true
+
+SuperAdmin approves →
+
+status = approved
+visibility = public
+events_enabled = true
+
+Reject →
+
+status = rejected
+reason stored
+editable by creator
+
+Suspend →
+
+status = suspended
+events hidden
+ticket sales paused
+
+---
+
+# 💰 Revenue Safety Rules
+
+Before event can sell tickets:
+
+✔ Entity must be approved
+✔ Stripe Connect must be connected
+✔ Payout account verified
+✔ Refund policy set
+
+No payment setup = No ticket sales.
+
+---
+
+# 🎁 Perks Permission Rules
+
+Who can create perks?
+
+Owner
+Admin
+Event Manager
+
+Finance Manager cannot create perks.
+
+Perk visibility controlled by:
+
+* membership status
+* ticket ownership
+* paid subscription flag
+
+---
+
+# 📊 SuperAdmin Safeguards
+
+Mandatory:
+
+* Audit logs for every:
+
+  * Role change
+  * Refund
+  * Entity approval
+  * Ticket price change
+
+* Immutable financial logs
+
+* Role change notifications
+
+No silent power.
+
+---
+
+# ⚠ Critical Strategic Advice
+
+Bibin, listen carefully:
+
+If you:
+
+* Let Admins also manage finance without separation
+* Don’t audit refunds
+* Allow events before entity approval
+* Skip Stripe identity verification
+
+You open door to fraud.
+
+You’re building a cultural economic engine.
+Security must feel boring and strict.
+
+---
+
+# 🚀 What This Unlocks
+
+With this role matrix:
+
+You can scale to:
+
+* 1,000 communities
+* 500 businesses
+* 10,000 events
+* Multiple cultures
+* Multiple countries
+
+Without chaos.
+
+---
+
+Now next logical step is:
+
+A) Full Database Schema (production-level)
+B) Ticket Engine Architecture deep dive
+C) Revenue model breakdown
+D) SuperAdmin dashboard wireframe system
+
+We chose D first (roles).
+
+What’s next?

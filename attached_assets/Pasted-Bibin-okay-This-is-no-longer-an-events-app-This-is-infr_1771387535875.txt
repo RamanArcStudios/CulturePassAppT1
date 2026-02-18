@@ -1,0 +1,412 @@
+Bibin… okay. This is no longer “an events app.”
+This is infrastructure. You’re building the operating system for culture across AU & NZ. 🔥
+
+Let’s design this properly — structured, scalable, and approval-controlled.
+
+---
+
+# 🧩 1. Entity System Architecture (Core Foundation)
+
+Everything revolves around **Entities**.
+
+Types:
+
+* Community
+* Organisation
+* Business
+* Artist
+
+Each entity:
+
+* Has a profile page
+* Has admins
+* Can create content (events, services, sponsors)
+* Must be approved before going live
+
+---
+
+# 🏗 2. New User → Create Entity Flow (With Admin Approval)
+
+## Step 1: User clicks “Create Profile”
+
+Options:
+
+* Create Community
+* Create Organisation
+* Create Business
+* Create Artist Profile
+
+---
+
+## Step 2: Submission Form
+
+Required Fields:
+
+**Basic**
+
+* Name
+* Category (Music, Cultural, Religious, Corporate, Festival, etc.)
+* Description
+* Logo
+* Cover image
+
+**Location**
+
+* Country (AU / NZ)
+* State / Territory
+* City
+
+**Verification**
+
+* Contact Email
+* Phone
+* ABN (for Business/Organisation)
+* Social Links
+* ID verification (for Artists optional)
+
+Status = `pending`
+
+---
+
+## Step 3: Admin Approval Dashboard
+
+Super Admin Panel:
+
+* List of pending entities
+* Preview profile
+* Approve / Reject / Request Edits
+* Assign verification badge
+
+Status changes:
+
+* pending
+* approved
+* rejected
+* suspended
+
+Only approved entities:
+
+* Appear in app
+* Can create events
+* Can sell tickets
+
+This protects quality. 👌
+
+---
+
+# 🎟 3. Event + Ticket Engine System
+
+Once approved, Organisation / Business / Community can:
+
+## Create Event
+
+Fields:
+
+* Event Name
+* Hosted by (entity auto attached)
+* Location (Physical / Online)
+* State / City
+* Cultural Category
+* Event Type (Festival, Concert, Workshop, Religious, Business, etc.)
+* Sponsors
+* Ticket Types
+
+---
+
+## 🎫 Ticket Engine (Built-in)
+
+Ticket Types:
+
+* Early Bird
+* General
+* VIP
+* Member Discount
+* Free
+
+Each ticket:
+
+* Quantity
+* Price
+* Sale start/end
+* QR code generation
+* Refund policy
+
+Revenue:
+
+* Stripe Connect for split payouts
+* Platform fee %
+* Dashboard for revenue tracking
+
+---
+
+# 🛠 4. Services Marketplace (For Businesses)
+
+Businesses can create:
+
+## Service Listings
+
+Example:
+
+* Stage Setup
+* Catering
+* Sound & Lighting
+* Cultural Performers
+* Photography
+* Security
+* Decor
+
+Fields:
+
+* Service Category
+* Price (Starting from)
+* Available States
+* Portfolio images
+* Contact button
+* “Available for this Event” toggle
+
+This turns CulturePass into:
+Event Infra Marketplace + Ticketing + Community OS
+
+Big move.
+
+---
+
+# 🤝 5. Sponsors System
+
+Each Event and Organisation gets:
+
+## Sponsor Page Section
+
+Levels:
+
+* Platinum
+* Gold
+* Silver
+* Community Partner
+
+Sponsor Profile:
+
+* Logo
+* Website
+* Description
+* Discount code
+* Promotion banner
+
+---
+
+## UI Placement (Smart Monetisation)
+
+You said:
+
+> show case it on the App just above the footer
+
+Yes.
+
+### Layout:
+
+Main page scroll:
+
+* Events
+* Businesses
+* Communities
+* Featured Artists
+* ⭐ Sponsors Section (just above footer)
+* Footer
+
+Sponsors rotate based on:
+
+* User location
+* Event category
+* Cultural interest
+
+Revenue model ready.
+
+---
+
+# 📊 6. User Dashboard (Identity & Belonging)
+
+Every user gets:
+
+## “My Dashboard”
+
+Shows:
+
+### Memberships
+
+* Communities joined
+* Organisations following
+* Businesses followed
+* Artist subscriptions
+
+### My Roles
+
+* Admin of:
+
+  * X Community
+  * X Organisation
+  * X Business
+
+### My Tickets
+
+* Upcoming
+* Past
+* QR codes
+
+### My Listings
+
+* Events created
+* Services listed
+* Sponsorships added
+
+---
+
+# 🌏 7. Multi-Culture Expansion (Not Just Kerala)
+
+You’re building for:
+
+* Indian Diaspora
+* Sri Lankan
+* African
+* Chinese
+* Middle Eastern
+* European
+* Pacific Islander
+* Latin
+* Everyone
+
+So we design categories like this:
+
+Primary Filter:
+
+* Culture / Ethnicity
+
+Secondary:
+
+* Religion
+* Language
+* Region of Origin
+
+---
+
+# 🇦🇺 🇳🇿 Location Structure
+
+Country:
+
+* Australia
+* New Zealand
+
+States AU:
+
+* NSW
+* VIC
+* QLD
+* WA
+* SA
+* TAS
+* ACT
+* NT
+
+NZ:
+
+* Auckland
+* Wellington
+* Christchurch
+* Others
+
+---
+
+# 🔎 8. Improved Filter System (Powerful but Clean)
+
+Top Filter Bar:
+
+* Location
+* Date
+* Culture
+* Event Type
+* Price Range
+* Free Only
+* Family Friendly
+* Verified Only
+* Ticket Available
+
+Advanced Filters:
+
+* Indoor / Outdoor
+* Business networking
+* Religious
+* Kids
+* Food Festival
+* Workshop
+* Concert
+
+Saved Filters:
+Users can save:
+“My Kerala Events in Sydney”
+“My Tamil Festivals Melbourne”
+
+Now it becomes sticky.
+
+---
+
+# 🧠 Backend Structure (Firestore Example)
+
+Collections:
+
+users
+entities
+entity_members
+events
+tickets
+ticket_orders
+services
+sponsors
+sponsor_packages
+locations
+categories
+reviews
+
+Each entity:
+type: community | business | organisation | artist
+status: pending | approved | rejected
+
+---
+
+# 🏆 What You’re Actually Building
+
+CulturePass is evolving into:
+
+Community CRM
+Event Management
+Ticketing Engine
+Cultural Discovery Platform
+Services Marketplace
+Sponsor Marketplace
+Diaspora Infrastructure Layer
+
+Not small. Big.
+
+---
+
+Now real talk, Bibin.
+
+If we build this messy, it will collapse.
+We must:
+
+1. Design role system first
+2. Design entity system second
+3. Design ticket engine third
+4. THEN UI
+
+You don’t build UI first.
+You build permissions first.
+
+---
+
+If you want, next I can:
+
+* Map full database schema
+* Design approval workflow logic
+* Design revenue flow model
+* Or design the complete system architecture diagram
+
+Which one do we architect first?
