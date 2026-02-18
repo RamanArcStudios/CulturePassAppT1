@@ -52,6 +52,8 @@ export const events = pgTable("events", {
   published: boolean("published").default(true),
   ticketsAvailable: integer("tickets_available").default(100),
   ticketsSold: integer("tickets_sold").default(0),
+  artistId: varchar("artist_id"),
+  country: text("country").default("Australia"),
   cpid: text("cpid").unique(),
   createdAt: timestamp("created_at").defaultNow(),
 });

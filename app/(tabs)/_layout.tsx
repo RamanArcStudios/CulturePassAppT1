@@ -15,11 +15,17 @@ function NativeTabLayout() {
         <Label>Discover</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="calendar">
-        <Icon sf={{ default: "calendar", selected: "calendar" }} md="calendar_today" />
+        <Icon
+          sf={{ default: "calendar", selected: "calendar" }}
+          md="calendar_today"
+        />
         <Label>Calendar</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="community">
-        <Icon sf={{ default: "person.3", selected: "person.3.fill" }} md="groups" />
+        <Icon
+          sf={{ default: "person.3", selected: "person.3.fill" }}
+          md="groups"
+        />
         <Label>Community</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="perks">
@@ -27,7 +33,10 @@ function NativeTabLayout() {
         <Label>Perks</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
-        <Icon sf={{ default: "person.circle", selected: "person.circle.fill" }} md="account_circle" />
+        <Icon
+          sf={{ default: "person.circle", selected: "person.circle.fill" }}
+          md="account_circle"
+        />
         <Label>Profile</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
@@ -62,7 +71,12 @@ function ClassicTabLayout() {
               style={StyleSheet.absoluteFill}
             />
           ) : isWeb ? (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? "#000" : "#fff" }]} />
+            <View
+              style={[
+                StyleSheet.absoluteFill,
+                { backgroundColor: isDark ? "#000" : "#fff" },
+              ]}
+            />
           ) : null,
         tabBarLabelStyle: {
           fontFamily: "Poppins_500Medium",
