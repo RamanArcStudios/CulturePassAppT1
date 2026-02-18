@@ -46,6 +46,10 @@ CulturePass is a mobile app for discovering and booking cultural events for Kera
 - /artist/[id] - Artist profile
 - /business/[id] - Business detail
 - /allevents - All events list with category filter
+- /settings/notifications - Notification toggle preferences
+- /settings/privacy - Profile visibility, data sharing, account management
+- /settings/help - FAQ accordion, contact options, community guidelines
+- /settings/about - App info, mission, features, social links
 
 ## Key Libraries
 - @expo-google-fonts/poppins for typography
