@@ -169,7 +169,7 @@ export default function DiscoverScreen() {
                 event={item}
                 variant="featured"
                 onSave={handleSave}
-                isSaved={savedEvents.includes(item.id)}
+                isSaved={savedEventIds.includes(item.id)}
               />
             )}
             scrollEnabled={featuredEvents.length > 0}

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,31 +6,40 @@ import {
   StyleSheet,
   Platform,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
+import { router } from "expo-router";
+import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
 import EventCard from "@/components/EventCard";
 import CategoryFilter from "@/components/CategoryFilter";
 import { type EventCategory, type Event } from "@/lib/data";
-import { getSavedEventIds, toggleSaveEvent } from "@/lib/storage";
+import { useAuth } from "@/lib/auth";
+import { apiRequest, queryClient } from "@/lib/query-client";
 
 export default function AllEventsScreen() {
   const [selectedCategory, setSelectedCategory] = useState<EventCategory | null>(null);
-  const [savedEvents, setSavedEvents] = useState<string[]>([]);
+  const { user, isAuthenticated } = useAuth();
 
   const { data: allEvents = [], isLoading } = useQuery<Event[]>({ queryKey: ['/api/events'] });
 
-  useEffect(() => {
-    getSavedEventIds().then(setSavedEvents);
-  }, []);
+  const savedEventIds: string[] = user?.savedEvents ?? [];
 
   const handleSave = useCallback(async (id: string) => {
-    const isSaved = await toggleSaveEvent(id);
-    setSavedEvents(prev =>
-      isSaved ? [...prev, id] : prev.filter(e => e !== id)
-    );
-  }, []);
+    if (!isAuthenticated) {
+      router.push("/auth");
+      return;
+    }
+    if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      await apiRequest("POST", "/api/users/save-event", { eventId: id });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    } catch {
+      Alert.alert("Error", "Failed to save event");
+    }
+  }, [isAuthenticated]);
 
   const filteredEvents = selectedCategory
     ? allEvents.filter(e => e.category === selectedCategory)
@@ -58,7 +67,7 @@ export default function AllEventsScreen() {
             event={event}
             variant="list"
             onSave={handleSave}
-            isSaved={savedEvents.includes(event.id)}
+            isSaved={savedEventIds.includes(event.id)}
           />
         ))}
       </View>
