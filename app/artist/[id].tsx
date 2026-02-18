@@ -6,20 +6,30 @@ import {
   Pressable,
   StyleSheet,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useQuery } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
-import { getArtistById } from "@/lib/data";
+import type { Artist } from "@/lib/data";
 
 export default function ArtistDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
 
-  const artist = getArtistById(id!);
+  const { data: artist, isLoading } = useQuery<Artist>({ queryKey: ['/api/artists', id] });
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={Colors.light.primary} />
+      </View>
+    );
+  }
 
   if (!artist) {
     return (
@@ -42,7 +52,7 @@ export default function ArtistDetailScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.imageContainer}>
-        <Image source={{ uri: artist.imageUrl }} style={styles.heroImage} contentFit="cover" transition={300} />
+        <Image source={{ uri: artist.imageUrl ?? undefined }} style={styles.heroImage} contentFit="cover" transition={300} />
         <LinearGradient
           colors={["rgba(0,0,0,0.3)", "transparent", "rgba(0,0,0,0.8)"]}
           style={StyleSheet.absoluteFill}
@@ -69,7 +79,7 @@ export default function ArtistDetailScreen() {
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Ionicons name="musical-notes" size={20} color={Colors.light.primary} />
-            <Text style={styles.statValue}>{artist.performances}</Text>
+            <Text style={styles.statValue}>{artist.performances ?? 0}</Text>
             <Text style={styles.statLabel}>Shows</Text>
           </View>
           <View style={styles.statCard}>

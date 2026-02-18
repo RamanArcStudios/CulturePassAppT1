@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Platform,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,16 +15,26 @@ import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import { useQuery } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
 import EventCard from "@/components/EventCard";
-import { getOrganisationById, getEvents } from "@/lib/data";
+import type { Organisation, Event } from "@/lib/data";
 
 export default function CommunityDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
 
-  const org = getOrganisationById(id!);
-  const orgEvents = getEvents().filter(e => e.orgId === id);
+  const { data: org, isLoading } = useQuery<Organisation>({ queryKey: ['/api/organisations', id] });
+  const { data: allEvents = [] } = useQuery<Event[]>({ queryKey: ['/api/events'] });
+  const orgEvents = allEvents.filter(e => e.orgId === id);
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={Colors.light.primary} />
+      </View>
+    );
+  }
 
   if (!org) {
     return (
@@ -46,7 +57,7 @@ export default function CommunityDetailScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.imageContainer}>
-        <Image source={{ uri: org.imageUrl }} style={styles.heroImage} contentFit="cover" transition={300} />
+        <Image source={{ uri: org.imageUrl ?? undefined }} style={styles.heroImage} contentFit="cover" transition={300} />
         <LinearGradient
           colors={["rgba(0,0,0,0.4)", "transparent", "rgba(0,0,0,0.7)"]}
           style={StyleSheet.absoluteFill}
@@ -66,7 +77,7 @@ export default function CommunityDetailScreen() {
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Ionicons name="people" size={20} color={Colors.light.primary} />
-            <Text style={styles.statValue}>{org.memberCount.toLocaleString()}</Text>
+            <Text style={styles.statValue}>{(org.memberCount ?? 0).toLocaleString()}</Text>
             <Text style={styles.statLabel}>Members</Text>
           </View>
           <View style={styles.statCard}>
@@ -76,7 +87,7 @@ export default function CommunityDetailScreen() {
           </View>
           <View style={styles.statCard}>
             <Ionicons name="time" size={20} color={Colors.light.accent} />
-            <Text style={styles.statValue}>{org.established}</Text>
+            <Text style={styles.statValue}>{org.established ?? "N/A"}</Text>
             <Text style={styles.statLabel}>Est.</Text>
           </View>
         </View>
@@ -87,7 +98,7 @@ export default function CommunityDetailScreen() {
         </View>
 
         <View style={styles.tagRow}>
-          {org.categories.map(c => (
+          {(org.categories ?? []).map(c => (
             <View key={c} style={styles.tag}>
               <Text style={styles.tagText}>{c}</Text>
             </View>

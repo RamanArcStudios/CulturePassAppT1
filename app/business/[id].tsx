@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Platform,
   Linking,
+  ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,14 +15,23 @@ import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import { useQuery } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
-import { getBusinessById } from "@/lib/data";
+import type { Business } from "@/lib/data";
 
 export default function BusinessDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
 
-  const business = getBusinessById(id!);
+  const { data: business, isLoading } = useQuery<Business>({ queryKey: ['/api/businesses', id] });
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={Colors.light.primary} />
+      </View>
+    );
+  }
 
   if (!business) {
     return (
@@ -53,7 +63,7 @@ export default function BusinessDetailScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.imageContainer}>
-        <Image source={{ uri: business.imageUrl }} style={styles.heroImage} contentFit="cover" transition={300} />
+        <Image source={{ uri: business.imageUrl ?? undefined }} style={styles.heroImage} contentFit="cover" transition={300} />
         <LinearGradient
           colors={["rgba(0,0,0,0.3)", "transparent", "rgba(0,0,0,0.6)"]}
           style={StyleSheet.absoluteFill}
@@ -73,8 +83,8 @@ export default function BusinessDetailScreen() {
         <Text style={styles.name}>{business.name}</Text>
 
         <View style={styles.ratingRow}>
-          {renderStars(business.rating)}
-          <Text style={styles.ratingText}>{business.rating}</Text>
+          {renderStars(business.rating ?? 0)}
+          <Text style={styles.ratingText}>{business.rating ?? 0}</Text>
         </View>
 
         <View style={styles.infoRow}>
@@ -95,7 +105,7 @@ export default function BusinessDetailScreen() {
           <Pressable
             onPress={() => {
               if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              Linking.openURL(`tel:${business.phone}`);
+              if (business.phone) Linking.openURL(`tel:${business.phone}`);
             }}
             style={styles.contactCard}
           >
@@ -103,12 +113,12 @@ export default function BusinessDetailScreen() {
               <Ionicons name="call" size={20} color={Colors.light.primary} />
             </View>
             <Text style={styles.contactLabel}>Call</Text>
-            <Text style={styles.contactValue}>{business.phone}</Text>
+            <Text style={styles.contactValue}>{business.phone ?? "N/A"}</Text>
           </Pressable>
           <Pressable
             onPress={() => {
               if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              Linking.openURL(`https://${business.website}`);
+              if (business.website) Linking.openURL(`https://${business.website}`);
             }}
             style={styles.contactCard}
           >
@@ -116,7 +126,7 @@ export default function BusinessDetailScreen() {
               <Ionicons name="globe" size={20} color={Colors.light.secondary} />
             </View>
             <Text style={styles.contactLabel}>Website</Text>
-            <Text style={styles.contactValue} numberOfLines={1}>{business.website}</Text>
+            <Text style={styles.contactValue} numberOfLines={1}>{business.website ?? "N/A"}</Text>
           </Pressable>
         </View>
       </View>
