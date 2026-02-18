@@ -10,11 +10,13 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
+  Modal,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
+import { Image } from "expo-image";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { router } from "expo-router";
 import Colors from "@/constants/colors";
@@ -39,6 +41,8 @@ export default function ProfileScreen() {
   const [editInstagram, setEditInstagram] = useState("");
   const [editLoading, setEditLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [qrModalVisible, setQrModalVisible] = useState(false);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
 
   const { data: allEvents = [], isLoading: loadingEvents } = useQuery<Event[]>({
     queryKey: ["/api/events"],
@@ -504,6 +508,16 @@ export default function ProfileScreen() {
                       {order.status}
                     </Text>
                   </View>
+                  <Pressable
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      setSelectedTicketId(order.id);
+                      setQrModalVisible(true);
+                    }}
+                    style={styles.qrBtn}
+                  >
+                    <Ionicons name="qr-code" size={18} color={Colors.light.secondary} />
+                  </Pressable>
                 </Pressable>
               );
             })
@@ -664,9 +678,92 @@ export default function ProfileScreen() {
           <Text style={styles.logoutText}>Log Out</Text>
         </Pressable>
       </View>
+
+      <Modal visible={qrModalVisible} transparent animationType="fade" onRequestClose={() => setQrModalVisible(false)}>
+        <Pressable style={qrStyles.overlay} onPress={() => setQrModalVisible(false)}>
+          <Pressable style={qrStyles.content} onPress={() => {}}>
+            <View style={qrStyles.header}>
+              <Text style={qrStyles.title}>Your Ticket</Text>
+              <Pressable onPress={() => setQrModalVisible(false)}>
+                <Ionicons name="close" size={24} color={Colors.light.text} />
+              </Pressable>
+            </View>
+            {selectedTicketId && (
+              <>
+                <Image
+                  source={{ uri: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`culturepass://checkin/${selectedTicketId}`)}` }}
+                  style={qrStyles.qrImage}
+                  contentFit="contain"
+                />
+                <Text style={qrStyles.instruction}>Present this QR code at the venue for check-in</Text>
+                <View style={qrStyles.idRow}>
+                  <Ionicons name="shield-checkmark" size={14} color={Colors.light.secondary} />
+                  <Text style={qrStyles.idText}>Ticket: {selectedTicketId.slice(0, 8).toUpperCase()}</Text>
+                </View>
+              </>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </ScrollView>
   );
 }
+
+const qrStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  content: {
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    padding: 24,
+    width: "100%",
+    maxWidth: 320,
+    alignItems: "center",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 20,
+    fontFamily: "Poppins_700Bold",
+    color: Colors.light.text,
+  },
+  qrImage: {
+    width: 200,
+    height: 200,
+    marginBottom: 16,
+  },
+  instruction: {
+    fontSize: 13,
+    fontFamily: "Poppins_400Regular",
+    color: Colors.light.textSecondary,
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  idRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: Colors.light.surfaceElevated,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  idText: {
+    fontSize: 12,
+    fontFamily: "Poppins_600SemiBold",
+    color: Colors.light.secondary,
+  },
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -1007,6 +1104,14 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: "Poppins_600SemiBold",
     textTransform: "capitalize" as const,
+  },
+  qrBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: Colors.light.secondary + "12",
+    alignItems: "center",
+    justifyContent: "center",
   },
   communityCard: {
     flexDirection: "row",

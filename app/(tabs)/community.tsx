@@ -30,10 +30,20 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
 export default function CommunityScreen() {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<TabKey>("organisations");
+  const [bizFilter, setBizFilter] = useState<string | null>(null);
+  const [bizCityFilter, setBizCityFilter] = useState<string | null>(null);
 
   const { data: organisations = [], isLoading: loadingOrgs } = useQuery<Organisation[]>({ queryKey: ['/api/organisations'] });
   const { data: businesses = [], isLoading: loadingBiz } = useQuery<Business[]>({ queryKey: ['/api/businesses'] });
   const { data: artists = [], isLoading: loadingArtists } = useQuery<Artist[]>({ queryKey: ['/api/artists'] });
+
+  const bizCategories = [...new Set(businesses.map(b => b.category).filter(Boolean))];
+  const bizCities = [...new Set(businesses.map(b => b.city).filter(Boolean))];
+  const filteredBusinesses = businesses.filter(biz => {
+    if (bizFilter && biz.category !== bizFilter) return false;
+    if (bizCityFilter && biz.city !== bizCityFilter) return false;
+    return true;
+  });
 
   const webTopInset = Platform.OS === "web" ? 67 : 0;
 
@@ -89,12 +99,56 @@ export default function CommunityScreen() {
 
       {activeTab === "businesses" && (
         <View style={styles.listSection}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
+            <Pressable
+              style={[styles.filterChip, !bizFilter && styles.filterChipActive]}
+              onPress={() => setBizFilter(null)}
+            >
+              <Text style={[styles.filterChipText, !bizFilter && styles.filterChipTextActive]}>All</Text>
+            </Pressable>
+            {bizCategories.map(cat => (
+              <Pressable
+                key={cat}
+                style={[styles.filterChip, bizFilter === cat && styles.filterChipActive]}
+                onPress={() => setBizFilter(bizFilter === cat ? null : cat)}
+              >
+                <Text style={[styles.filterChipText, bizFilter === cat && styles.filterChipTextActive]}>{cat}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+          {bizCities.length > 1 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
+              <Pressable
+                style={[styles.filterChip, styles.filterChipCity, !bizCityFilter && styles.filterChipCityActive]}
+                onPress={() => setBizCityFilter(null)}
+              >
+                <Ionicons name="location" size={12} color={!bizCityFilter ? "#fff" : Colors.light.textSecondary} />
+                <Text style={[styles.filterChipText, !bizCityFilter && styles.filterChipTextActive]}>All Cities</Text>
+              </Pressable>
+              {bizCities.map(city => (
+                <Pressable
+                  key={city}
+                  style={[styles.filterChip, styles.filterChipCity, bizCityFilter === city && styles.filterChipCityActive]}
+                  onPress={() => setBizCityFilter(bizCityFilter === city ? null : city)}
+                >
+                  <Ionicons name="location" size={12} color={bizCityFilter === city ? "#fff" : Colors.light.textSecondary} />
+                  <Text style={[styles.filterChipText, bizCityFilter === city && styles.filterChipTextActive]}>{city}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          )}
           <Text style={styles.countText}>
-            {businesses.length} businesses
+            {filteredBusinesses.length} business{filteredBusinesses.length !== 1 ? "es" : ""}
           </Text>
-          {businesses.map(biz => (
+          {filteredBusinesses.map(biz => (
             <BusinessCard key={biz.id} business={biz} />
           ))}
+          {filteredBusinesses.length === 0 && (
+            <View style={styles.emptyState}>
+              <Ionicons name="search" size={36} color={Colors.light.textTertiary} />
+              <Text style={styles.emptyText}>No businesses match your filters</Text>
+            </View>
+          )}
         </View>
       )}
 
@@ -171,5 +225,49 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
     color: Colors.light.textSecondary,
     marginBottom: 12,
+  },
+  filterRow: {
+    gap: 8,
+    paddingBottom: 10,
+  },
+  filterChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    backgroundColor: Colors.light.surfaceElevated,
+    borderWidth: 1,
+    borderColor: Colors.light.borderLight,
+  },
+  filterChipActive: {
+    backgroundColor: Colors.light.primary,
+    borderColor: Colors.light.primary,
+  },
+  filterChipCity: {
+    backgroundColor: Colors.light.surfaceElevated,
+  },
+  filterChipCityActive: {
+    backgroundColor: Colors.light.secondary,
+    borderColor: Colors.light.secondary,
+  },
+  filterChipText: {
+    fontSize: 12,
+    fontFamily: "Poppins_500Medium",
+    color: Colors.light.textSecondary,
+  },
+  filterChipTextActive: {
+    color: "#fff",
+  },
+  emptyState: {
+    alignItems: "center",
+    paddingVertical: 32,
+    gap: 8,
+  },
+  emptyText: {
+    fontSize: 14,
+    fontFamily: "Poppins_400Regular",
+    color: Colors.light.textTertiary,
   },
 });

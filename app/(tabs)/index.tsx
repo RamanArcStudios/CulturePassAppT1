@@ -101,8 +101,8 @@ export default function DiscoverScreen() {
       >
         <View style={styles.headerContent}>
           <View>
-            <Text style={styles.greeting}>Discover</Text>
-            <Text style={styles.subtitle}>Cultural events in Australia</Text>
+            <Text style={styles.greeting}>CulturePass</Text>
+            <Text style={styles.subtitle}>Discover cultural events in Australia & NZ</Text>
           </View>
           <Pressable
             onPress={() => {

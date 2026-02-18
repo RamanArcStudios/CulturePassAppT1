@@ -8,6 +8,7 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  Share,
 } from "react-native";
 import { useLocalSearchParams, router, useNavigation } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -29,6 +30,22 @@ export default function CommunityDetailScreen() {
   const { isAuthenticated } = useAuth();
   const navigation = useNavigation();
   const goBack = () => navigation.canGoBack() ? router.back() : router.replace("/");
+
+  const handleShare = useCallback(async () => {
+    try {
+      const url = `https://culturepass.replit.app/community/${id}`;
+      if (Platform.OS === "web") {
+        if (typeof navigator !== "undefined" && navigator.share) {
+          await navigator.share({ title: org?.name ?? "", url });
+        } else if (typeof navigator !== "undefined" && navigator.clipboard) {
+          await navigator.clipboard.writeText(url);
+          Alert.alert("Link Copied", "Link copied to clipboard");
+        }
+      } else {
+        await Share.share({ message: `Check out ${org?.name} on CulturePass! ${url}` });
+      }
+    } catch {}
+  }, [id, org]);
 
   const { data: memberships = [] } = useQuery<Membership[]>({
     queryKey: ["/api/memberships"],
@@ -79,6 +96,12 @@ export default function CommunityDetailScreen() {
           style={[styles.backBtn, { top: insets.top + webTopInset + 8 }]}
         >
           <Ionicons name="arrow-back" size={22} color="#fff" />
+        </Pressable>
+        <Pressable
+          onPress={handleShare}
+          style={[styles.shareBtn, { top: insets.top + webTopInset + 8 }]}
+        >
+          <Ionicons name="share-outline" size={22} color="#fff" />
         </Pressable>
       </View>
 
@@ -186,6 +209,16 @@ const styles = StyleSheet.create({
   backBtn: {
     position: "absolute",
     left: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  shareBtn: {
+    position: "absolute",
+    right: 16,
     width: 40,
     height: 40,
     borderRadius: 20,

@@ -8,6 +8,8 @@ import {
   Platform,
   Linking,
   ActivityIndicator,
+  Share,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, router, useNavigation } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -52,6 +54,22 @@ export default function VenueDetailScreen() {
   const { data: venueEvents } = useQuery<Event[]>({
     queryKey: ["/api/venues", id, "events"],
   });
+
+  const handleShare = useCallback(async () => {
+    try {
+      const url = `https://culturepass.replit.app/venue/${id}`;
+      if (Platform.OS === "web") {
+        if (typeof navigator !== "undefined" && navigator.share) {
+          await navigator.share({ title: venue?.name ?? "", url });
+        } else if (typeof navigator !== "undefined" && navigator.clipboard) {
+          await navigator.clipboard.writeText(url);
+          Alert.alert("Link Copied", "Link copied to clipboard");
+        }
+      } else {
+        await Share.share({ message: `Check out ${venue?.name} on CulturePass! ${url}` });
+      }
+    } catch {}
+  }, [id, venue]);
 
   const openDirections = useCallback(() => {
     if (!venue) return;
@@ -107,9 +125,14 @@ export default function VenueDetailScreen() {
             <Pressable onPress={goBack} style={styles.heroBtn}>
               <Ionicons name="arrow-back" size={22} color="#fff" />
             </Pressable>
-            <Pressable onPress={openDirections} style={styles.heroBtn}>
-              <Ionicons name="navigate" size={22} color="#fff" />
-            </Pressable>
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Pressable onPress={handleShare} style={styles.heroBtn}>
+                <Ionicons name="share-outline" size={22} color="#fff" />
+              </Pressable>
+              <Pressable onPress={openDirections} style={styles.heroBtn}>
+                <Ionicons name="navigate" size={22} color="#fff" />
+              </Pressable>
+            </View>
           </View>
           <View style={styles.heroInfo}>
             <View style={styles.typeBadge}>

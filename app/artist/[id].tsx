@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   Platform,
   ActivityIndicator,
   FlatList,
+  Share,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, router, useNavigation } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -108,6 +110,22 @@ export default function ArtistDetailScreen() {
   const activeEvents = groupedEvents[activeTab];
   const totalUpcoming = groupedEvents.local.length + groupedEvents.state.length + groupedEvents.country.length + groupedEvents.world.length;
 
+  const handleShare = useCallback(async () => {
+    try {
+      const url = `https://culturepass.replit.app/artist/${id}`;
+      if (Platform.OS === "web") {
+        if (typeof navigator !== "undefined" && navigator.share) {
+          await navigator.share({ title: artist?.name ?? "", url });
+        } else if (typeof navigator !== "undefined" && navigator.clipboard) {
+          await navigator.clipboard.writeText(url);
+          Alert.alert("Link Copied", "Link copied to clipboard");
+        }
+      } else {
+        await Share.share({ message: `Check out ${artist?.name} on CulturePass! ${url}` });
+      }
+    } catch {}
+  }, [id, artist]);
+
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -147,6 +165,12 @@ export default function ArtistDetailScreen() {
           style={[styles.backBtn, { top: insets.top + webTopInset + 8 }]}
         >
           <Ionicons name="arrow-back" size={22} color="#fff" />
+        </Pressable>
+        <Pressable
+          onPress={handleShare}
+          style={[styles.shareBtn, { top: insets.top + webTopInset + 8 }]}
+        >
+          <Ionicons name="share-outline" size={22} color="#fff" />
         </Pressable>
         {artist.featured && (
           <View style={styles.featuredBadge}>
@@ -352,10 +376,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  shareBtn: {
+    position: "absolute",
+    right: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   featuredBadge: {
     position: "absolute",
     top: 16,
-    right: 16,
+    right: 64,
     flexDirection: "row",
     alignItems: "center",
     gap: 4,

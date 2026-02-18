@@ -10,6 +10,7 @@ import {
   Modal,
   ActivityIndicator,
   Linking,
+  Share,
 } from "react-native";
 import { useLocalSearchParams, router, useNavigation } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -58,6 +59,23 @@ export default function EventDetailScreen() {
       Alert.alert("Error", "Failed to save event");
     }
   }, [id, isAuthenticated]);
+
+  const handleShare = useCallback(async () => {
+    if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      const shareUrl = `https://culturepass.replit.app/event/${id}`;
+      if (Platform.OS === "web") {
+        if (typeof navigator !== "undefined" && navigator.share) {
+          await navigator.share({ title: event?.title ?? "", text: event?.description ?? "", url: shareUrl });
+        } else if (typeof navigator !== "undefined" && navigator.clipboard) {
+          await navigator.clipboard.writeText(shareUrl);
+          Alert.alert("Link Copied", "Event link copied to clipboard");
+        }
+      } else {
+        await Share.share({ message: `Check out ${event?.title} on CulturePass! ${shareUrl}` });
+      }
+    } catch {}
+  }, [id, event]);
 
   const handleBook = useCallback(() => {
     if (!isAuthenticated) {
@@ -145,6 +163,12 @@ export default function EventDetailScreen() {
               color="#fff"
             />
           </Pressable>
+          <Pressable
+            onPress={handleShare}
+            style={[styles.shareBtn, { top: insets.top + webTopInset + 8 }]}
+          >
+            <Ionicons name="share-outline" size={22} color="#fff" />
+          </Pressable>
           <View style={styles.heroOverlay}>
             <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
               <Text style={styles.categoryText}>{event.category}</Text>
@@ -183,7 +207,19 @@ export default function EventDetailScreen() {
               </View>
             </View>
 
-            <View style={styles.infoCard}>
+            <Pressable 
+              style={styles.infoCard}
+              onPress={() => {
+                if (event.lat && event.lng) {
+                  const scheme = Platform.select({
+                    ios: `http://maps.apple.com/?daddr=${event.lat},${event.lng}&q=${encodeURIComponent(event.venue)}`,
+                    android: `https://www.google.com/maps/dir/?api=1&destination=${event.lat},${event.lng}`,
+                    default: `https://www.google.com/maps/dir/?api=1&destination=${event.lat},${event.lng}`,
+                  });
+                  Linking.openURL(scheme);
+                }
+              }}
+            >
               <View style={[styles.infoIconBox, { backgroundColor: Colors.light.accent + "15" }]}>
                 <Ionicons name="location" size={20} color={Colors.light.accent} />
               </View>
@@ -192,7 +228,8 @@ export default function EventDetailScreen() {
                 <Text style={styles.infoValue}>{event.venue}</Text>
                 <Text style={styles.infoSub}>{event.city}, {event.state}</Text>
               </View>
-            </View>
+              <Ionicons name="navigate" size={18} color={Colors.light.accent} />
+            </Pressable>
           </View>
 
           <View style={styles.ticketInfo}>
@@ -360,6 +397,16 @@ const styles = StyleSheet.create({
   saveBtn: {
     position: "absolute",
     right: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  shareBtn: {
+    position: "absolute",
+    right: 64,
     width: 40,
     height: 40,
     borderRadius: 20,
