@@ -206,6 +206,10 @@ export const storage = {
     return result.length > 0;
   },
 
+  async getEventsByArtist(artistId: string): Promise<Event[]> {
+    return db.select().from(events).where(and(eq(events.published, true), eq(events.artistId, artistId))).orderBy(events.date);
+  },
+
   // Perks
   async getPerks(): Promise<Perk[]> {
     return db.select().from(perks).where(eq(perks.status, "active"));

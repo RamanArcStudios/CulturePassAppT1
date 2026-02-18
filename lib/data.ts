@@ -18,6 +18,8 @@ export interface Event {
   trending: boolean | null;
   ticketsAvailable: number | null;
   ticketsSold: number | null;
+  artistId: string | null;
+  country: string | null;
   cpid: string | null;
   published: boolean | null;
   createdAt: string | null;

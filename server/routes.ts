@@ -297,6 +297,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/artists/:id/events", async (req: Request, res: Response) => {
+    try {
+      const events = await storage.getEventsByArtist(req.params.id);
+      res.json(events);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.get("/api/artists/:id", async (req: Request, res: Response) => {
     try {
       const artist = await storage.getArtistById(req.params.id);
