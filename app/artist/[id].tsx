@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useQuery } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
+import SocialLinksBar from "@/components/SocialLinksBar";
 import type { Artist, Event } from "@/lib/data";
 
 type LocationTab = "local" | "state" | "country" | "world";
@@ -180,6 +181,7 @@ export default function ArtistDetailScreen() {
 
         <Text style={styles.sectionTitle}>About</Text>
         <Text style={styles.bio}>{artist.bio}</Text>
+        <SocialLinksBar socialLinks={artist?.socialLinks} website={artist?.website} style={{ marginTop: 16 }} />
 
         <View style={styles.eventsHeader}>
           <Text style={styles.sectionTitle}>Upcoming Events</Text>

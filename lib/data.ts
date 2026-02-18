@@ -1,3 +1,12 @@
+export interface SocialLinks {
+  facebook?: string;
+  instagram?: string;
+  twitter?: string;
+  youtube?: string;
+  tiktok?: string;
+  linkedin?: string;
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -48,6 +57,7 @@ export interface Venue {
   website: string | null;
   description: string | null;
   approved: boolean | null;
+  socialLinks: SocialLinks | null;
   cpid: string | null;
   createdAt: string | null;
 }
@@ -63,6 +73,8 @@ export interface Organisation {
   cpid: string | null;
   established: string | null;
   categories: string[] | null;
+  website: string | null;
+  socialLinks: SocialLinks | null;
 }
 
 export interface Business {
@@ -82,6 +94,7 @@ export interface Business {
   lat: number | null;
   lng: number | null;
   serviceLocations: string[] | null;
+  socialLinks: SocialLinks | null;
 }
 
 export interface Artist {
@@ -96,6 +109,8 @@ export interface Artist {
   cpid: string | null;
   performances: number | null;
   slug: string | null;
+  website: string | null;
+  socialLinks: SocialLinks | null;
 }
 
 export interface Perk {
@@ -141,6 +156,8 @@ export interface UserProfile {
   savedEvents: string[] | null;
   memberOf: string[] | null;
   roleGlobal: string | null;
+  website: string | null;
+  socialLinks: SocialLinks | null;
 }
 
 export const EVENT_CATEGORIES: EventCategory[] = [

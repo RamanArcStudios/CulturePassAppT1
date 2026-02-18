@@ -435,10 +435,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/users/profile", async (req: Request, res: Response) => {
     try {
       if (!req.session.userId) return res.status(401).json({ error: "Login required" });
-      const { name, email, city, state, country, phone } = req.body;
+      const { name, email, city, state, country, phone, website, socialLinks } = req.body;
       const updateData: any = { name, email, city, state };
       if (country !== undefined) updateData.country = country;
       if (phone !== undefined) updateData.phone = phone;
+      if (website !== undefined) updateData.website = website;
+      if (socialLinks !== undefined) updateData.socialLinks = socialLinks;
       const updated = await storage.updateUser(req.session.userId, updateData);
       if (!updated) return res.status(404).json({ error: "User not found" });
       const { password: _, ...safeUser } = updated;

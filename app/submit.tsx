@@ -52,11 +52,21 @@ export default function SubmitScreen() {
   const [bizPhone, setBizPhone] = useState("");
   const [bizWebsite, setBizWebsite] = useState("");
 
+  const [orgWebsite, setOrgWebsite] = useState("");
+  const [orgFacebook, setOrgFacebook] = useState("");
+  const [orgInstagram, setOrgInstagram] = useState("");
+
+  const [bizFacebook, setBizFacebook] = useState("");
+  const [bizInstagram, setBizInstagram] = useState("");
+
   const [artName, setArtName] = useState("");
   const [artGenre, setArtGenre] = useState("");
   const [artBio, setArtBio] = useState("");
   const [artCity, setArtCity] = useState("");
   const [artState, setArtState] = useState("NSW");
+  const [artWebsite, setArtWebsite] = useState("");
+  const [artFacebook, setArtFacebook] = useState("");
+  const [artInstagram, setArtInstagram] = useState("");
 
   const goBack = () =>
     navigation.canGoBack() ? router.back() : router.replace("/");
@@ -77,11 +87,19 @@ export default function SubmitScreen() {
     setBizState("NSW");
     setBizPhone("");
     setBizWebsite("");
+    setBizFacebook("");
+    setBizInstagram("");
+    setOrgWebsite("");
+    setOrgFacebook("");
+    setOrgInstagram("");
     setArtName("");
     setArtGenre("");
     setArtBio("");
     setArtCity("");
     setArtState("NSW");
+    setArtWebsite("");
+    setArtFacebook("");
+    setArtInstagram("");
   };
 
   const validate = (): string | null => {
@@ -98,6 +116,13 @@ export default function SubmitScreen() {
     return null;
   };
 
+  const buildSocialLinks = (facebook: string, instagram: string) => {
+    const links: Record<string, string> = {};
+    if (facebook.trim()) links.facebook = facebook.trim();
+    if (instagram.trim()) links.instagram = instagram.trim();
+    return Object.keys(links).length > 0 ? links : null;
+  };
+
   const buildPayload = () => {
     if (type === "organisation") {
       return {
@@ -107,6 +132,8 @@ export default function SubmitScreen() {
         state: orgState,
         established: orgEstablished.trim() || null,
         categories: orgCategories.length > 0 ? orgCategories : null,
+        website: orgWebsite.trim() || null,
+        socialLinks: buildSocialLinks(orgFacebook, orgInstagram),
       };
     } else if (type === "business") {
       return {
@@ -117,6 +144,7 @@ export default function SubmitScreen() {
         state: bizState,
         phone: bizPhone.trim() || null,
         website: bizWebsite.trim() || null,
+        socialLinks: buildSocialLinks(bizFacebook, bizInstagram),
       };
     } else {
       return {
@@ -125,6 +153,8 @@ export default function SubmitScreen() {
         bio: artBio.trim(),
         city: artCity.trim(),
         state: artState,
+        website: artWebsite.trim() || null,
+        socialLinks: buildSocialLinks(artFacebook, artInstagram),
       };
     }
   };
@@ -335,6 +365,40 @@ export default function SubmitScreen() {
                   })}
                 </View>
               </FormField>
+              <Text style={styles.socialHeader}>Social Links</Text>
+              <FormField label="Website">
+                <TextInput
+                  style={styles.input}
+                  value={orgWebsite}
+                  onChangeText={setOrgWebsite}
+                  placeholder="https://yourorganisation.com"
+                  placeholderTextColor={Colors.light.textTertiary}
+                  keyboardType="url"
+                  autoCapitalize="none"
+                />
+              </FormField>
+              <FormField label="Facebook">
+                <TextInput
+                  style={styles.input}
+                  value={orgFacebook}
+                  onChangeText={setOrgFacebook}
+                  placeholder="https://facebook.com/yourpage"
+                  placeholderTextColor={Colors.light.textTertiary}
+                  keyboardType="url"
+                  autoCapitalize="none"
+                />
+              </FormField>
+              <FormField label="Instagram">
+                <TextInput
+                  style={styles.input}
+                  value={orgInstagram}
+                  onChangeText={setOrgInstagram}
+                  placeholder="https://instagram.com/yourpage"
+                  placeholderTextColor={Colors.light.textTertiary}
+                  keyboardType="url"
+                  autoCapitalize="none"
+                />
+              </FormField>
             </>
           )}
 
@@ -417,6 +481,29 @@ export default function SubmitScreen() {
                   autoCapitalize="none"
                 />
               </FormField>
+              <Text style={styles.socialHeader}>Social Links</Text>
+              <FormField label="Facebook">
+                <TextInput
+                  style={styles.input}
+                  value={bizFacebook}
+                  onChangeText={setBizFacebook}
+                  placeholder="https://facebook.com/yourpage"
+                  placeholderTextColor={Colors.light.textTertiary}
+                  keyboardType="url"
+                  autoCapitalize="none"
+                />
+              </FormField>
+              <FormField label="Instagram">
+                <TextInput
+                  style={styles.input}
+                  value={bizInstagram}
+                  onChangeText={setBizInstagram}
+                  placeholder="https://instagram.com/yourpage"
+                  placeholderTextColor={Colors.light.textTertiary}
+                  keyboardType="url"
+                  autoCapitalize="none"
+                />
+              </FormField>
             </>
           )}
 
@@ -463,6 +550,40 @@ export default function SubmitScreen() {
               </FormField>
               <FormField label="State">
                 <StateSelector value={artState} onChange={setArtState} />
+              </FormField>
+              <Text style={styles.socialHeader}>Social Links</Text>
+              <FormField label="Website">
+                <TextInput
+                  style={styles.input}
+                  value={artWebsite}
+                  onChangeText={setArtWebsite}
+                  placeholder="https://yourwebsite.com"
+                  placeholderTextColor={Colors.light.textTertiary}
+                  keyboardType="url"
+                  autoCapitalize="none"
+                />
+              </FormField>
+              <FormField label="Facebook">
+                <TextInput
+                  style={styles.input}
+                  value={artFacebook}
+                  onChangeText={setArtFacebook}
+                  placeholder="https://facebook.com/yourpage"
+                  placeholderTextColor={Colors.light.textTertiary}
+                  keyboardType="url"
+                  autoCapitalize="none"
+                />
+              </FormField>
+              <FormField label="Instagram">
+                <TextInput
+                  style={styles.input}
+                  value={artInstagram}
+                  onChangeText={setArtInstagram}
+                  placeholder="https://instagram.com/yourpage"
+                  placeholderTextColor={Colors.light.textTertiary}
+                  keyboardType="url"
+                  autoCapitalize="none"
+                />
               </FormField>
             </>
           )}
@@ -602,6 +723,12 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 20,
     gap: 18,
+  },
+  socialHeader: {
+    fontSize: 16,
+    fontFamily: "Poppins_700Bold",
+    color: Colors.light.text,
+    marginTop: 8,
   },
   fieldContainer: {
     gap: 8,

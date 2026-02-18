@@ -30,6 +30,8 @@ export const users = pgTable("users", {
   savedEvents: jsonb("saved_events").$type<string[]>().default([]),
   memberOf: jsonb("member_of").$type<string[]>().default([]),
   roleGlobal: text("role_global").default("user"),
+  website: text("website").default(""),
+  socialLinks: jsonb("social_links").$type<{facebook?: string; instagram?: string; twitter?: string; youtube?: string; tiktok?: string; linkedin?: string;}>().default({}),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -85,6 +87,7 @@ export const venues = pgTable("venues", {
   website: text("website").default(""),
   description: text("description").default(""),
   approved: boolean("approved").default(true),
+  socialLinks: jsonb("social_links").$type<{facebook?: string; instagram?: string; twitter?: string; youtube?: string; tiktok?: string; linkedin?: string;}>().default({}),
   cpid: text("cpid").unique(),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -105,6 +108,8 @@ export const organisations = pgTable("organisations", {
   slug: text("slug"),
   status: text("status").default("active"),
   ownerId: varchar("owner_id"),
+  website: text("website").default(""),
+  socialLinks: jsonb("social_links").$type<{facebook?: string; instagram?: string; twitter?: string; youtube?: string; tiktok?: string; linkedin?: string;}>().default({}),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -129,6 +134,7 @@ export const businesses = pgTable("businesses", {
   lat: doublePrecision("lat"),
   lng: doublePrecision("lng"),
   serviceLocations: jsonb("service_locations").$type<string[]>().default([]),
+  socialLinks: jsonb("social_links").$type<{facebook?: string; instagram?: string; twitter?: string; youtube?: string; tiktok?: string; linkedin?: string;}>().default({}),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -148,6 +154,8 @@ export const artists = pgTable("artists", {
   slug: text("slug"),
   status: text("status").default("active"),
   ownerId: varchar("owner_id"),
+  website: text("website").default(""),
+  socialLinks: jsonb("social_links").$type<{facebook?: string; instagram?: string; twitter?: string; youtube?: string; tiktok?: string; linkedin?: string;}>().default({}),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -219,6 +227,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   state: true,
   country: true,
   phone: true,
+  website: true,
 });
 
 export const insertEventSchema = createInsertSchema(events).omit({

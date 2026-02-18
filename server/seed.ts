@@ -5,6 +5,7 @@ import {
   businesses,
   artists,
   perks,
+  venues,
   cpids,
 } from "@shared/schema";
 
@@ -38,6 +39,8 @@ async function seed() {
       established: "2005",
       categories: ["Cultural", "Social"],
       slug: "kerala-samajam-sydney",
+      website: "https://keralasamajamsydney.org.au",
+      socialLinks: { facebook: "https://facebook.com/keralasamajamsydney", instagram: "https://instagram.com/keralasamajamsyd" },
     },
     {
       name: "Melbourne Malayalam Association",
@@ -50,6 +53,8 @@ async function seed() {
       established: "2008",
       categories: ["Cultural", "Language"],
       slug: "melbourne-malayalam-assoc",
+      website: "https://melbournemalayalam.org.au",
+      socialLinks: { facebook: "https://facebook.com/melbournemalayalam", youtube: "https://youtube.com/@melbmalayalam" },
     },
     {
       name: "Pravasi Malayali Association Brisbane",
@@ -332,6 +337,7 @@ async function seed() {
       cpid: generateCPID("CP-B-"),
       rating: 4.7,
       isSponsor: true,
+      socialLinks: { facebook: "https://facebook.com/malabarspicekitchen", instagram: "https://instagram.com/malabarspiceau" },
     },
     {
       name: "Kochi Express",
@@ -418,6 +424,8 @@ async function seed() {
       cpid: generateCPID("CP-AR-"),
       performances: 120,
       slug: "meera-krishnamurthy",
+      website: "https://meerakrishnamurthy.com",
+      socialLinks: { instagram: "https://instagram.com/meeradance", youtube: "https://youtube.com/@meerakrishnamurthy" },
     },
     {
       name: "Arjun Menon",
@@ -430,6 +438,7 @@ async function seed() {
       cpid: generateCPID("CP-AR-"),
       performances: 85,
       slug: "arjun-menon",
+      socialLinks: { facebook: "https://facebook.com/arjunmenonmusic", instagram: "https://instagram.com/arjunmenon" },
     },
     {
       name: "Lakshmi Nair",

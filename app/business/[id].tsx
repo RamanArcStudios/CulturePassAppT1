@@ -17,6 +17,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
+import SocialLinksBar from "@/components/SocialLinksBar";
 import type { Business } from "@/lib/data";
 
 export default function BusinessDetailScreen() {
@@ -131,6 +132,7 @@ export default function BusinessDetailScreen() {
             <Text style={styles.contactValue} numberOfLines={1}>{business.website ?? "N/A"}</Text>
           </Pressable>
         </View>
+        <SocialLinksBar socialLinks={business?.socialLinks} website={business?.website} style={{ marginTop: 16 }} />
       </View>
     </ScrollView>
   );

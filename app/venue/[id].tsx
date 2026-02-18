@@ -16,6 +16,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useQuery } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
+import SocialLinksBar from "@/components/SocialLinksBar";
 import type { Venue, Event } from "@/lib/data";
 
 const VENUE_TYPE_ICONS: Record<string, string> = {
@@ -206,6 +207,13 @@ export default function VenueDetailScreen() {
                   <Text style={styles.contactText}>{venue.website}</Text>
                 </Pressable>
               )}
+            </View>
+          )}
+
+          {(venue.socialLinks && Object.values(venue.socialLinks).some(Boolean)) && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Follow Us</Text>
+              <SocialLinksBar socialLinks={venue.socialLinks} website={venue.website} />
             </View>
           )}
 

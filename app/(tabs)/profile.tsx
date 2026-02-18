@@ -34,6 +34,9 @@ export default function ProfileScreen() {
   const [editEmail, setEditEmail] = useState("");
   const [editCity, setEditCity] = useState("");
   const [editState, setEditState] = useState("");
+  const [editWebsite, setEditWebsite] = useState("");
+  const [editFacebook, setEditFacebook] = useState("");
+  const [editInstagram, setEditInstagram] = useState("");
   const [editLoading, setEditLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -85,6 +88,9 @@ export default function ProfileScreen() {
     setEditEmail(user?.email || "");
     setEditCity(user?.city || "");
     setEditState(user?.state || "");
+    setEditWebsite(user?.website || "");
+    setEditFacebook(user?.socialLinks?.facebook || "");
+    setEditInstagram(user?.socialLinks?.instagram || "");
     setEditing(true);
   };
 
@@ -95,11 +101,16 @@ export default function ProfileScreen() {
     }
     setEditLoading(true);
     try {
+      const socialLinks: Record<string, string> = {};
+      if (editFacebook.trim()) socialLinks.facebook = editFacebook.trim();
+      if (editInstagram.trim()) socialLinks.instagram = editInstagram.trim();
       await updateProfile({
         name: editName.trim(),
         email: editEmail.trim(),
         city: editCity.trim(),
         state: editState.trim(),
+        website: editWebsite.trim() || undefined,
+        socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : {},
       });
       setEditing(false);
       if (Platform.OS !== "web")
@@ -306,6 +317,43 @@ export default function ProfileScreen() {
                 onChangeText={setEditState}
               />
             </View>
+          </View>
+          <Text style={styles.editSocialHeader}>Social Links</Text>
+          <View style={styles.editInputGroup}>
+            <Text style={styles.editLabel}>Website</Text>
+            <TextInput
+              style={styles.editInput}
+              value={editWebsite}
+              onChangeText={setEditWebsite}
+              placeholder="https://yourwebsite.com"
+              placeholderTextColor={Colors.light.textTertiary}
+              keyboardType="url"
+              autoCapitalize="none"
+            />
+          </View>
+          <View style={styles.editInputGroup}>
+            <Text style={styles.editLabel}>Facebook</Text>
+            <TextInput
+              style={styles.editInput}
+              value={editFacebook}
+              onChangeText={setEditFacebook}
+              placeholder="https://facebook.com/yourpage"
+              placeholderTextColor={Colors.light.textTertiary}
+              keyboardType="url"
+              autoCapitalize="none"
+            />
+          </View>
+          <View style={styles.editInputGroup}>
+            <Text style={styles.editLabel}>Instagram</Text>
+            <TextInput
+              style={styles.editInput}
+              value={editInstagram}
+              onChangeText={setEditInstagram}
+              placeholder="https://instagram.com/yourpage"
+              placeholderTextColor={Colors.light.textTertiary}
+              keyboardType="url"
+              autoCapitalize="none"
+            />
           </View>
           <View style={styles.editBtnRow}>
             <Pressable
@@ -802,6 +850,12 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_700Bold",
     color: Colors.light.text,
     marginBottom: 16,
+  },
+  editSocialHeader: {
+    fontSize: 15,
+    fontFamily: "Poppins_700Bold",
+    color: Colors.light.text,
+    marginTop: 4,
   },
   editInputGroup: {
     marginBottom: 14,

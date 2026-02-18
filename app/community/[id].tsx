@@ -17,6 +17,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
 import Colors from "@/constants/colors";
+import SocialLinksBar from "@/components/SocialLinksBar";
 import EventCard from "@/components/EventCard";
 import type { Organisation, Event, Membership } from "@/lib/data";
 import { useAuth } from "@/lib/auth";
@@ -118,6 +119,7 @@ export default function CommunityDetailScreen() {
 
         <Text style={styles.sectionTitle}>About</Text>
         <Text style={styles.description}>{org.description}</Text>
+        <SocialLinksBar socialLinks={org?.socialLinks} website={org?.website} style={{ marginTop: 16 }} />
 
         {isJoined ? (
           <View style={styles.joinedBadge}>
