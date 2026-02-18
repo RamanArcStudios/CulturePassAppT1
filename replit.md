@@ -4,6 +4,9 @@
 CulturePass is a mobile app for discovering and booking cultural events for Kerala/Malayalee communities in Australia. Built with Expo (React Native) + Express backend with PostgreSQL database.
 
 ## Recent Changes
+- 2026-02-18: Stripe payment integration for paid event ticket purchases via /api/checkout endpoint; free events confirmed directly, paid events redirect to Stripe checkout
+- 2026-02-18: Admin system with role-based access (roleGlobal field), admin dashboard (/admin), pending submission approval/rejection, admin API routes (/api/admin/*)
+- 2026-02-18: User submission forms (/submit) for organisations, businesses, artists with pending status workflow
 - 2026-02-18: Full auth system with login/signup/logout, profile editing, API-backed saved events (replaced AsyncStorage), join community, book tickets with auth guards
 - 2026-02-18: Full backend infrastructure with PostgreSQL database, Drizzle ORM, REST API, session auth, and all screens connected to live data
 - 2026-02-17: Initial MVP build with event discovery, calendar, community directory, business listings, artist profiles, perks, and user profile
@@ -29,8 +32,10 @@ CulturePass is a mobile app for discovering and booking cultural events for Kera
 - Artists: GET /api/artists, /api/artists/featured, /api/artists/:id; POST/PUT
 - Perks: GET /api/perks, /api/perks/:id; POST
 - Orders: GET/POST /api/orders
+- Checkout: POST /api/checkout (Stripe for paid events, direct confirm for free)
 - Memberships: GET/POST /api/memberships
 - Users: POST /api/users/save-event; PUT /api/users/profile
+- Admin: GET /api/admin/stats, /api/admin/pending; POST /api/admin/approve/:type/:id, /api/admin/reject/:type/:id
 - CPID lookup: GET /api/cpid/:cpid
 
 ## Tab Structure
@@ -41,11 +46,13 @@ CulturePass is a mobile app for discovering and booking cultural events for Kera
 - Profile - Auth gate, saved events, my tickets, my communities, edit profile, logout
 
 ## Detail Screens
-- /event/[id] - Full event details with booking
+- /event/[id] - Full event details with booking (Stripe checkout for paid, direct confirm for free)
 - /community/[id] - Organisation detail
 - /artist/[id] - Artist profile
 - /business/[id] - Business detail
 - /allevents - All events list with category filter
+- /admin - Admin dashboard (stats, pending submissions, approve/reject)
+- /submit - User submission forms (organisations, businesses, artists)
 - /settings/notifications - Notification toggle preferences
 - /settings/privacy - Profile visibility, data sharing, account management
 - /settings/help - FAQ accordion, contact options, community guidelines
