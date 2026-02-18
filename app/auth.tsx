@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   ScrollView,
+  Modal,
 } from "react-native";
 import { router, useNavigation } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -36,7 +37,12 @@ export default function AuthScreen() {
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("Sydney");
   const [state, setState] = useState("NSW");
+  const [country, setCountry] = useState("Australia");
+  const [phone, setPhone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSent, setForgotSent] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
 
   const handleSubmit = useCallback(async () => {
     setError("");
@@ -65,6 +71,8 @@ export default function AuthScreen() {
           email: email.trim(),
           city: city.trim(),
           state: state.trim(),
+          country: country.trim(),
+          phone: phone.trim(),
         });
       }
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -81,7 +89,24 @@ export default function AuthScreen() {
     } finally {
       setLoading(false);
     }
-  }, [mode, username, password, name, email, city, state, login, register]);
+  }, [mode, username, password, name, email, city, state, country, phone, login, register]);
+
+  const handleForgotPassword = useCallback(async () => {
+    if (!forgotEmail.trim()) {
+      setError("Please enter your email address");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { apiRequest } = await import("@/lib/query-client");
+      await apiRequest("POST", "/api/auth/forgot-password", { email: forgotEmail.trim() });
+      setForgotSent(true);
+    } catch {
+      setError("Failed to send reset email. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, [forgotEmail]);
 
   const toggleMode = () => {
     setMode(m => (m === "login" ? "signup" : "login"));
@@ -220,6 +245,35 @@ export default function AuthScreen() {
                   </View>
                 </View>
               </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Country</Text>
+                <View style={styles.inputContainer}>
+                  <Ionicons name="globe-outline" size={18} color={Colors.light.textTertiary} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Australia"
+                    placeholderTextColor={Colors.light.textTertiary}
+                    value={country}
+                    onChangeText={setCountry}
+                    testID="auth-country"
+                  />
+                </View>
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Phone</Text>
+                <View style={styles.inputContainer}>
+                  <Ionicons name="call-outline" size={18} color={Colors.light.textTertiary} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="+61 4XX XXX XXX"
+                    placeholderTextColor={Colors.light.textTertiary}
+                    value={phone}
+                    onChangeText={setPhone}
+                    keyboardType="phone-pad"
+                    testID="auth-phone"
+                  />
+                </View>
+              </View>
             </>
           )}
 
@@ -245,6 +299,15 @@ export default function AuthScreen() {
               </Pressable>
             </View>
           </View>
+
+          {mode === "login" && (
+            <Pressable
+              onPress={() => { setShowForgot(true); setError(""); setForgotSent(false); }}
+              style={styles.forgotLink}
+            >
+              <Text style={styles.forgotText}>Forgot password?</Text>
+            </Pressable>
+          )}
 
           <Pressable
             onPress={handleSubmit}
@@ -282,6 +345,67 @@ export default function AuthScreen() {
           </Pressable>
         </View>
       </ScrollView>
+
+      <Modal visible={showForgot} transparent animationType="fade">
+        <Pressable style={styles.modalOverlay} onPress={() => setShowForgot(false)}>
+          <Pressable style={[styles.forgotModal, { paddingBottom: insets.bottom + 20 }]} onPress={(e) => e.stopPropagation()}>
+            {forgotSent ? (
+              <View style={{ alignItems: "center" }}>
+                <Ionicons name="checkmark-circle" size={56} color={Colors.light.success} />
+                <Text style={styles.forgotTitle}>Check Your Email</Text>
+                <Text style={styles.forgotDesc}>
+                  If an account with that email exists, we've sent a password reset link. Check your inbox and spam folder.
+                </Text>
+                <Pressable
+                  onPress={() => setShowForgot(false)}
+                  style={styles.forgotSubmitBtn}
+                >
+                  <Text style={styles.forgotSubmitText}>Done</Text>
+                </Pressable>
+              </View>
+            ) : (
+              <>
+                <Text style={styles.forgotTitle}>Reset Password</Text>
+                <Text style={styles.forgotDesc}>
+                  Enter your email address and we'll send you a link to reset your password.
+                </Text>
+                {!!error && (
+                  <View style={[styles.errorBox, { marginBottom: 12 }]}>
+                    <Ionicons name="alert-circle" size={16} color={Colors.light.error} />
+                    <Text style={styles.errorText}>{error}</Text>
+                  </View>
+                )}
+                <View style={styles.inputContainer}>
+                  <Ionicons name="mail-outline" size={18} color={Colors.light.textTertiary} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="your@email.com"
+                    placeholderTextColor={Colors.light.textTertiary}
+                    value={forgotEmail}
+                    onChangeText={setForgotEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                </View>
+                <Pressable
+                  onPress={handleForgotPassword}
+                  disabled={loading}
+                  style={[styles.forgotSubmitBtn, { opacity: loading ? 0.6 : 1 }]}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.forgotSubmitText}>Send Reset Link</Text>
+                  )}
+                </Pressable>
+                <Pressable onPress={() => setShowForgot(false)} style={{ alignSelf: "center", marginTop: 12 }}>
+                  <Text style={{ fontFamily: "Poppins_500Medium", color: Colors.light.textSecondary }}>Cancel</Text>
+                </Pressable>
+              </>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -437,5 +561,56 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Poppins_700Bold",
     color: Colors.light.primary,
+  },
+  forgotLink: {
+    alignSelf: "flex-end",
+    marginTop: -8,
+    marginBottom: 8,
+  },
+  forgotText: {
+    fontSize: 13,
+    fontFamily: "Poppins_500Medium",
+    color: Colors.light.secondary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  forgotModal: {
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    padding: 28,
+    width: "90%",
+    maxWidth: 400,
+  },
+  forgotTitle: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 22,
+    color: Colors.light.text,
+    marginTop: 12,
+    marginBottom: 8,
+    textAlign: "center" as const,
+  },
+  forgotDesc: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 14,
+    color: Colors.light.textSecondary,
+    textAlign: "center" as const,
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  forgotSubmitBtn: {
+    backgroundColor: Colors.light.secondary,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center" as const,
+    marginTop: 16,
+  },
+  forgotSubmitText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 16,
+    color: "#fff",
   },
 });

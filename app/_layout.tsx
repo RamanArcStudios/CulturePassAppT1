@@ -75,6 +75,14 @@ function RootLayoutNav() {
         name="admin"
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="map"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="venue/[id]"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

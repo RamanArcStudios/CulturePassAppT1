@@ -84,8 +84,9 @@ export default function DiscoverScreen() {
   if (loadingEvents) return <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><ActivityIndicator size="large" color={Colors.light.primary} /></View>;
 
   return (
+    <View style={styles.container}>
     <ScrollView
-      style={styles.container}
+      style={{ flex: 1 }}
       contentContainerStyle={{ paddingBottom: 100 }}
       showsVerticalScrollIndicator={false}
       refreshControl={
@@ -235,6 +236,17 @@ export default function DiscoverScreen() {
         </>
       )}
     </ScrollView>
+
+    <Pressable
+      style={styles.mapFab}
+      onPress={() => {
+        if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        router.push("/map");
+      }}
+    >
+      <Ionicons name="map" size={22} color="#fff" />
+    </Pressable>
+  </View>
   );
 }
 
@@ -323,5 +335,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Poppins_400Regular",
     color: Colors.light.textSecondary,
+  },
+  mapFab: {
+    position: "absolute",
+    right: 20,
+    bottom: Platform.OS === "web" ? 100 : 90,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: Colors.light.secondary,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 100,
   },
 });
