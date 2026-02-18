@@ -4,6 +4,7 @@
 CulturePass is a mobile app for discovering and booking cultural events for Kerala/Malayalee communities in Australia. Built with Expo (React Native) + Express backend with PostgreSQL database.
 
 ## Recent Changes
+- 2026-02-18: Social media links (Facebook, Instagram, Twitter/X, YouTube, TikTok, LinkedIn) and website URL fields added to users, organisations, businesses, artists, venues; SocialLinksBar component on all detail pages; social fields in submission forms and profile edit
 - 2026-02-18: Stripe payment integration for paid event ticket purchases via /api/checkout endpoint; free events confirmed directly, paid events redirect to Stripe checkout
 - 2026-02-18: Admin system with role-based access (roleGlobal field), admin dashboard (/admin), pending submission approval/rejection, admin API routes (/api/admin/*)
 - 2026-02-18: User submission forms (/submit) for organisations, businesses, artists with pending status workflow
