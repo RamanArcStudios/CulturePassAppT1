@@ -113,7 +113,7 @@ export default function ArtistDetailScreen() {
 
   const handleShare = useCallback(async () => {
     try {
-      const url = `https://culturepass.replit.app/artist/${id}`;
+      const url = `https://${process.env.EXPO_PUBLIC_DOMAIN}/artist/${id}`;
       if (Platform.OS === "web") {
         if (typeof navigator !== "undefined" && navigator.share) {
           await navigator.share({ title: artist?.name ?? "", url });

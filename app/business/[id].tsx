@@ -32,7 +32,7 @@ export default function BusinessDetailScreen() {
 
   const handleShare = useCallback(async () => {
     try {
-      const url = `https://culturepass.replit.app/business/${id}`;
+      const url = `https://${process.env.EXPO_PUBLIC_DOMAIN}/business/${id}`;
       if (Platform.OS === "web") {
         if (typeof navigator !== "undefined" && navigator.share) {
           await navigator.share({ title: business?.name ?? "", url });

@@ -64,13 +64,13 @@ export const storage = {
     return user;
   },
 
-  async getUserByReplitId(replitId: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.replitId, replitId));
+  async getUserByFirebaseUid(firebaseUid: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.firebaseUid, firebaseUid));
     return user;
   },
 
-  async upsertReplitUser(replitId: string, username: string, profileImageUrl?: string): Promise<User> {
-    const existing = await this.getUserByReplitId(replitId);
+  async upsertFirebaseUser(firebaseUid: string, username: string, profileImageUrl?: string): Promise<User> {
+    const existing = await this.getUserByFirebaseUid(firebaseUid);
     if (existing) {
       const updates: Partial<User> = {};
       if (profileImageUrl) updates.profileImageUrl = profileImageUrl;
@@ -88,8 +88,8 @@ export const storage = {
     const cpid = generateCPID("CP-U-");
     const [user] = await db.insert(users).values({
       username: finalUsername,
-      password: `replit_auth_${Date.now()}`,
-      replitId: replitId,
+      password: `firebase_auth_${Date.now()}`,
+      firebaseUid: firebaseUid,
       profileImageUrl: profileImageUrl || "",
       name: username,
     }).returning();

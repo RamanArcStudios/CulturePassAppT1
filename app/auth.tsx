@@ -20,16 +20,15 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import Colors from "@/constants/colors";
 import { useAuth } from "@/lib/auth";
-import { getApiUrl } from "@/lib/query-client";
 
 type AuthMode = "login" | "signup";
 
 export default function AuthScreen() {
   const insets = useSafeAreaInsets();
-  const { login, register, loginWithReplit } = useAuth();
+  const { login, register, loginWithGoogle } = useAuth();
   const navigation = useNavigation();
   const goBack = () => navigation.canGoBack() ? router.back() : router.replace("/");
-  const [replitLoading, setReplitLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [mode, setMode] = useState<AuthMode>("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -113,60 +112,21 @@ export default function AuthScreen() {
     }
   }, [forgotEmail]);
 
-  const handleReplitLogin = useCallback(async () => {
+  const handleGoogleLogin = useCallback(async () => {
     setError("");
-    setReplitLoading(true);
+    setGoogleLoading(true);
     try {
-      if (Platform.OS === "web") {
-        const baseUrl = getApiUrl();
-        const loginUrl = new URL("/__repl/auth", baseUrl).toString();
-        window.open(loginUrl, "_blank", "width=400,height=600");
-        const checkAuth = async () => {
-          try {
-            const user = await loginWithReplit();
-            if (user) {
-              if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              goBack();
-              return true;
-            }
-          } catch {}
-          return false;
-        };
-        let attempts = 0;
-        const interval = setInterval(async () => {
-          attempts++;
-          const success = await checkAuth();
-          if (success || attempts > 60) {
-            clearInterval(interval);
-            setReplitLoading(false);
-            if (!success && attempts > 60) {
-              setError("Login timed out. Please try again.");
-            }
-          }
-        }, 2000);
-      } else {
-        const baseUrl = getApiUrl();
-        const loginUrl = new URL("/__repl/auth", baseUrl).toString();
-        await Linking.openURL(loginUrl);
-        setTimeout(async () => {
-          try {
-            const user = await loginWithReplit();
-            if (user) {
-              if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              goBack();
-            }
-          } catch {
-            setError("Replit login failed. Please try again.");
-          } finally {
-            setReplitLoading(false);
-          }
-        }, 3000);
+      const user = await loginWithGoogle();
+      if (user) {
+        if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        goBack();
       }
     } catch (err: any) {
-      setError(err.message || "Replit login failed");
-      setReplitLoading(false);
+      setError(err.message || "Google sign-in failed");
+    } finally {
+      setGoogleLoading(false);
     }
-  }, [loginWithReplit, goBack]);
+  }, [loginWithGoogle, goBack]);
 
   const toggleMode = () => {
     setMode(m => (m === "login" ? "signup" : "login"));
@@ -207,20 +167,20 @@ export default function AuthScreen() {
 
         <View style={styles.formContainer}>
           <Pressable
-            onPress={handleReplitLogin}
-            disabled={replitLoading}
+            onPress={handleGoogleLogin}
+            disabled={googleLoading}
             style={({ pressed }) => [
-              styles.replitBtn,
-              { opacity: replitLoading ? 0.6 : pressed ? 0.9 : 1 },
+              styles.googleBtn,
+              { opacity: googleLoading ? 0.6 : pressed ? 0.9 : 1 },
             ]}
-            testID="auth-replit"
+            testID="auth-google"
           >
-            {replitLoading ? (
+            {googleLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <>
-                <Ionicons name="logo-react" size={20} color="#fff" />
-                <Text style={styles.replitBtnText}>Sign in with Replit</Text>
+                <Ionicons name="logo-google" size={20} color="#fff" />
+                <Text style={styles.googleBtnText}>Sign in with Google</Text>
               </>
             )}
           </Pressable>
@@ -713,17 +673,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#fff",
   },
-  replitBtn: {
+  googleBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
-    backgroundColor: "#0D101E",
+    backgroundColor: "#4285F4",
     paddingVertical: 16,
     borderRadius: 16,
     marginBottom: 16,
   },
-  replitBtnText: {
+  googleBtnText: {
     fontSize: 16,
     fontFamily: "Poppins_700Bold",
     color: "#fff",

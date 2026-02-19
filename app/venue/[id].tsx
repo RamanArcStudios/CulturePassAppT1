@@ -57,7 +57,7 @@ export default function VenueDetailScreen() {
 
   const handleShare = useCallback(async () => {
     try {
-      const url = `https://culturepass.replit.app/venue/${id}`;
+      const url = `https://${process.env.EXPO_PUBLIC_DOMAIN}/venue/${id}`;
       if (Platform.OS === "web") {
         if (typeof navigator !== "undefined" && navigator.share) {
           await navigator.share({ title: venue?.name ?? "", url });

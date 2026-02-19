@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient, getQueryFn } from "./query-client";
+import { auth } from "./firebase";
+import { GoogleAuthProvider, signInWithPopup, signInWithCredential } from "firebase/auth";
 
 export interface AuthUser {
   id: string;
@@ -18,7 +20,7 @@ export interface AuthUser {
   referralCode: string | null;
   website: string | null;
   socialLinks: Record<string, string> | null;
-  replitId: string | null;
+  firebaseUid: string | null;
   profileImageUrl: string | null;
   createdAt: string | null;
 }
@@ -29,7 +31,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<AuthUser>;
   register: (data: { username: string; password: string; name: string; email?: string; city?: string; state?: string; country?: string; phone?: string; referralCode?: string }) => Promise<AuthUser>;
-  loginWithReplit: () => Promise<AuthUser | null>;
+  loginWithGoogle: () => Promise<AuthUser | null>;
   logout: () => Promise<void>;
   updateProfile: (data: { name?: string; email?: string; city?: string; state?: string; country?: string; phone?: string; website?: string; socialLinks?: Record<string, string> }) => Promise<AuthUser>;
   refetchUser: () => void;
@@ -61,8 +63,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return data;
   }, []);
 
-  const loginWithReplit = useCallback(async (): Promise<AuthUser | null> => {
-    const res = await apiRequest("GET", "/api/auth/replit");
+  const loginWithGoogle = useCallback(async (): Promise<AuthUser | null> => {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const idToken = await result.user.getIdToken();
+    const res = await apiRequest("POST", "/api/auth/firebase", { idToken });
     const data = await res.json();
     queryClient.setQueryData(["/api/auth/me"], data);
     queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
@@ -91,12 +96,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: !!user,
       login,
       register,
-      loginWithReplit,
+      loginWithGoogle,
       logout,
       updateProfile,
       refetchUser: refetch,
     }),
-    [user, isLoading, login, register, loginWithReplit, logout, updateProfile, refetch]
+    [user, isLoading, login, register, loginWithGoogle, logout, updateProfile, refetch]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

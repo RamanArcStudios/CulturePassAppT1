@@ -42,7 +42,7 @@ export default function CommunityDetailScreen() {
 
   const handleShare = useCallback(async () => {
     try {
-      const url = `https://culturepass.replit.app/community/${id}`;
+      const url = `https://${process.env.EXPO_PUBLIC_DOMAIN}/community/${id}`;
       if (Platform.OS === "web") {
         if (typeof navigator !== "undefined" && navigator.share) {
           await navigator.share({ title: org?.name ?? "", url });
