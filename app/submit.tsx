@@ -237,7 +237,7 @@ export default function SubmitScreen() {
           </View>
           <Text style={styles.centeredTitle}>Submitted!</Text>
           <Text style={styles.centeredSubtitle}>
-            Your submission is pending review. We'll notify you once it's approved.
+            Your submission is pending review. We&apos;ll notify you once it&apos;s approved.
           </Text>
           <View style={styles.successActions}>
             <Pressable style={styles.outlineButton} onPress={handleSubmitAnother}>

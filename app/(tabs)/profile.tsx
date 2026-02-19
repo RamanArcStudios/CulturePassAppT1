@@ -66,7 +66,7 @@ export default function ProfileScreen() {
     queryKey: ["/api/organisations"],
   });
 
-  const { data: referralData } = useQuery<{ count: number; referrals: Array<{ name: string; joinedAt: string }> }>({
+  const { data: referralData } = useQuery<{ count: number; referrals: { name: string; joinedAt: string }[] }>({
     queryKey: ["/api/referrals/my"],
     enabled: isAuthenticated,
   });

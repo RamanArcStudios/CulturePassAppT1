@@ -68,7 +68,7 @@ export default function PrivacySettingsScreen() {
               </View>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Show Communities</Text>
-                <Text style={styles.settingDesc}>Display communities you've joined on your profile</Text>
+                <Text style={styles.settingDesc}>Display communities you&apos;ve joined on your profile</Text>
               </View>
               <Switch
                 value={settings.showCommunities}
@@ -83,7 +83,7 @@ export default function PrivacySettingsScreen() {
               </View>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Show Saved Events</Text>
-                <Text style={styles.settingDesc}>Let others see events you've saved</Text>
+                <Text style={styles.settingDesc}>Let others see events you&apos;ve saved</Text>
               </View>
               <Switch
                 value={settings.showSavedEvents}

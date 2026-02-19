@@ -1,47 +1,9 @@
-import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Tabs } from "expo-router";
-import { NativeTabs, Icon, Label } from "expo-router/unstable-native-tabs";
 import { BlurView } from "expo-blur";
 import { Platform, StyleSheet, useColorScheme, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import Colors from "@/constants/colors";
-
-function NativeTabLayout() {
-  return (
-    <NativeTabs>
-      <NativeTabs.Trigger name="index">
-        <Icon sf={{ default: "sparkles", selected: "sparkles" }} md="explore" />
-        <Label>Discover</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="calendar">
-        <Icon
-          sf={{ default: "calendar", selected: "calendar" }}
-          md="calendar_today"
-        />
-        <Label>Calendar</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="community">
-        <Icon
-          sf={{ default: "person.3", selected: "person.3.fill" }}
-          md="groups"
-        />
-        <Label>Community</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="perks">
-        <Icon sf={{ default: "tag", selected: "tag.fill" }} md="local_offer" />
-        <Label>Perks</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="profile">
-        <Icon
-          sf={{ default: "person.circle", selected: "person.circle.fill" }}
-          md="account_circle"
-        />
-        <Label>Profile</Label>
-      </NativeTabs.Trigger>
-    </NativeTabs>
-  );
-}
 
 function ClassicTabLayout() {
   const colorScheme = useColorScheme();
@@ -134,8 +96,5 @@ function ClassicTabLayout() {
 }
 
 export default function TabLayout() {
-  if (isLiquidGlassAvailable()) {
-    return <NativeTabLayout />;
-  }
   return <ClassicTabLayout />;
 }
