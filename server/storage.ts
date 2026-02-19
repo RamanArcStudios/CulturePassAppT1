@@ -61,6 +61,40 @@ export const storage = {
     return user;
   },
 
+  async getUserByReplitId(replitId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.replitId, replitId));
+    return user;
+  },
+
+  async upsertReplitUser(replitId: string, username: string, profileImageUrl?: string): Promise<User> {
+    const existing = await this.getUserByReplitId(replitId);
+    if (existing) {
+      const updates: Partial<User> = {};
+      if (profileImageUrl) updates.profileImageUrl = profileImageUrl;
+      if (Object.keys(updates).length > 0) {
+        const [updated] = await db.update(users).set(updates).where(eq(users.id, existing.id)).returning();
+        return updated;
+      }
+      return existing;
+    }
+    let finalUsername = username;
+    const taken = await this.getUserByUsername(username);
+    if (taken) {
+      finalUsername = `${username}_${Date.now().toString(36)}`;
+    }
+    const cpid = generateCPID("CP-U-");
+    const [user] = await db.insert(users).values({
+      username: finalUsername,
+      password: `replit_auth_${Date.now()}`,
+      replitId: replitId,
+      profileImageUrl: profileImageUrl || "",
+      name: username,
+    }).returning();
+    await db.update(users).set({ cpid }).where(eq(users.id, user.id));
+    await registerCPID(cpid, "user", user.id);
+    return { ...user, cpid };
+  },
+
   async createUser(data: InsertUser): Promise<User> {
     const cpid = generateCPID("CP-U-");
     const [user] = await db.insert(users).values({ ...data, cpid }).returning();
