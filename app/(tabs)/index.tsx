@@ -32,7 +32,7 @@ import {
 } from "@/lib/data";
 import { useAuth } from "@/lib/auth";
 import { apiRequest, queryClient } from "@/lib/query-client";
-import { useDebounce } from "@/lib/use-debounce";
+import { useDebounce } from "use-debounce";
 
 export default function DiscoverScreen() {
   const insets = useSafeAreaInsets();

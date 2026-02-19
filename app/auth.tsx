@@ -414,7 +414,7 @@ export default function AuthScreen() {
                 <Ionicons name="checkmark-circle" size={56} color={Colors.light.success} />
                 <Text style={styles.forgotTitle}>Check Your Email</Text>
                 <Text style={styles.forgotDesc}>
-                  If an account with that email exists, we've sent a password reset link. Check your inbox and spam folder.
+                  If an account with that email exists, we&apos;ve sent a password reset link. Check your inbox and spam folder.
                 </Text>
                 <Pressable
                   onPress={() => setShowForgot(false)}
@@ -427,7 +427,7 @@ export default function AuthScreen() {
               <>
                 <Text style={styles.forgotTitle}>Reset Password</Text>
                 <Text style={styles.forgotDesc}>
-                  Enter your email address and we'll send you a link to reset your password.
+                  Enter your email address and we&apos;ll send you a link to reset your password.
                 </Text>
                 {!!error && (
                   <View style={[styles.errorBox, { marginBottom: 12 }]}>
