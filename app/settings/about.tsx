@@ -53,10 +53,10 @@ export default function AboutScreen() {
           <Text style={styles.sectionTitle}>Our Mission</Text>
           <View style={styles.sectionCard}>
             <Text style={styles.missionText}>
-              CulturePass is dedicated to preserving and celebrating Kerala's rich cultural heritage across Australia. We connect Malayalee communities with cultural events, local businesses, talented artists, and exclusive member perks.
+              CulturePass is dedicated to preserving and celebrating Kerala&apos;s rich cultural heritage across Australia. We connect Malayalee communities with cultural events, local businesses, talented artists, and exclusive member perks.
             </Text>
             <Text style={[styles.missionText, { marginTop: 12 }]}>
-              Whether it's Onam celebrations in Sydney, Vishu festivals in Melbourne, or Kathakali performances in Brisbane, CulturePass brings your community together.
+              Whether it&apos;s Onam celebrations in Sydney, Vishu festivals in Melbourne, or Kathakali performances in Brisbane, CulturePass brings your community together.
             </Text>
           </View>
         </View>
