@@ -4,6 +4,7 @@
 CulturePass is a mobile app for discovering and booking cultural events for Kerala/Malayalee communities in Australia & NZ. Built with Expo (React Native) + Express backend with PostgreSQL database.
 
 ## Recent Changes
+- 2026-02-19: Replit Auth integration - users can sign in with their Replit account via "Sign in with Replit" button on auth screen; backend reads X-Replit-User-* headers and creates/links user accounts; replitId and profileImageUrl columns added to users table
 - 2026-02-18: Clickable map/directions on event detail pages - venue cards open native maps apps
 - 2026-02-18: Universal share functionality on all detail pages (events, venues, artists, communities, businesses)
 - 2026-02-18: QR code modal for purchased tickets in profile using QR code API
@@ -22,7 +23,7 @@ CulturePass is a mobile app for discovering and booking cultural events for Kera
 - **Frontend**: Expo Router (file-based routing) with React Native
 - **Backend**: Express server on port 5000
 - **Database**: PostgreSQL with Drizzle ORM (`shared/schema.ts` for schema, `server/storage.ts` for queries)
-- **Auth**: Session-based auth with connect-pg-simple for PostgreSQL session storage
+- **Auth**: Session-based auth with connect-pg-simple for PostgreSQL session storage; Replit Auth supported via X-Replit-User-* headers (GET /api/auth/replit)
 - **Data Fetching**: React Query (`@tanstack/react-query`) with default queryFn in `lib/query-client.ts`
 - **Fonts**: Poppins (Google Fonts)
 - **Colors**: Warm coral/terracotta primary (#D4654A), deep teal secondary (#16656E), gold accent (#C9941A)
@@ -32,7 +33,7 @@ CulturePass is a mobile app for discovering and booking cultural events for Kera
 - CPID system for unique entity identification (e.g., CP-EVT-001, CP-ORG-001)
 
 ## API Routes (server/routes.ts)
-- Auth: POST /api/auth/register, /api/auth/login, /api/auth/logout; GET /api/auth/me
+- Auth: POST /api/auth/register, /api/auth/login, /api/auth/logout; GET /api/auth/me, /api/auth/replit
 - Events: GET /api/events, /api/events/featured, /api/events/trending, /api/events/dates, /api/events/by-date/:date, /api/events/:id; POST/PUT/DELETE /api/events/:id
 - Organisations: GET /api/organisations, /api/organisations/:id; POST/PUT
 - Businesses: GET /api/businesses, /api/businesses/:id; POST/PUT
