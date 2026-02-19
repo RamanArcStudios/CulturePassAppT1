@@ -7,6 +7,7 @@ import session from "express-session";
 import pgSession from "connect-pg-simple";
 import pg from "pg";
 import { getStripeClient, getStripePublishableKey } from "./stripeClient";
+import { adminAuth } from "./firebaseAdmin";
 
 declare module "express-session" {
   interface SessionData {
@@ -127,6 +128,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     req.session.destroy(() => {
       res.json({ ok: true });
     });
+  });
+
+  // Firebase token verification & session creation
+  app.post("/api/auth/firebase", async (req: Request, res: Response) => {
+    try {
+      const { idToken } = req.body;
+      if (!idToken) return res.status(400).json({ error: "Firebase ID token required" });
+
+      const decoded = await adminAuth.verifyIdToken(idToken);
+      const { uid, name: displayName, email, picture } = decoded;
+
+      const user = await storage.upsertFirebaseUser(
+        uid,
+        displayName || email || uid,
+        picture,
+      );
+
+      if (email && !user.email) {
+        await storage.updateUser(user.id, { email });
+      }
+
+      req.session.userId = user.id;
+      const { password: _, ...safeUser } = user;
+      res.json(safeUser);
+    } catch (err: any) {
+      res.status(401).json({ error: "Invalid Firebase token" });
+    }
   });
 
   app.get("/api/auth/me", async (req: Request, res: Response) => {

@@ -63,7 +63,7 @@ export default function EventDetailScreen() {
   const handleShare = useCallback(async () => {
     if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
-      const shareUrl = `https://culturepass.replit.app/event/${id}`;
+      const shareUrl = `https://${process.env.EXPO_PUBLIC_DOMAIN}/event/${id}`;
       if (Platform.OS === "web") {
         if (typeof navigator !== "undefined" && navigator.share) {
           await navigator.share({ title: event?.title ?? "", text: event?.description ?? "", url: shareUrl });

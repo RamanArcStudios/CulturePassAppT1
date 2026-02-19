@@ -151,7 +151,7 @@ export default function ProfileScreen() {
   const handleShareReferral = useCallback(async () => {
     const code = user?.referralCode;
     if (!code) return;
-    const url = `https://culturepass.replit.app/auth?ref=${code}`;
+    const url = `https://${process.env.EXPO_PUBLIC_DOMAIN}/auth?ref=${code}`;
     const message = `Join CulturePass with my referral code ${code}! ${url}`;
     try {
       if (Platform.OS === "web") {
