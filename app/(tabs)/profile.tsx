@@ -26,6 +26,7 @@ import EventCard from "@/components/EventCard";
 import { type Event, type Organisation, type Order, type Membership } from "@/lib/data";
 import { useAuth } from "@/lib/auth";
 import { apiRequest, queryClient } from "@/lib/query-client";
+import MembershipCard from "@/components/MembershipCard";
 
 type ProfileTab = "saved" | "tickets" | "communities";
 
@@ -45,6 +46,7 @@ export default function ProfileScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [qrModalVisible, setQrModalVisible] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [memberCardVisible, setMemberCardVisible] = useState(false);
 
   const { data: allEvents = [], isLoading: loadingEvents } = useQuery<Event[]>({
     queryKey: ["/api/events"],
@@ -271,7 +273,9 @@ export default function ProfileScreen() {
         ]}
       >
         <View style={styles.headerActions}>
-          <View style={{ width: 36 }} />
+          <Pressable onPress={() => setMemberCardVisible(true)} style={styles.headerActionBtn}>
+            <Ionicons name="card-outline" size={18} color="#fff" />
+          </Pressable>
           <Pressable onPress={startEditing} style={styles.headerActionBtn}>
             <Feather name="edit-2" size={18} color="#fff" />
           </Pressable>
@@ -756,6 +760,22 @@ export default function ProfileScreen() {
           <Text style={styles.logoutText}>Log Out</Text>
         </Pressable>
       </View>
+
+      {user && (
+        <MembershipCard
+          visible={memberCardVisible}
+          onClose={() => setMemberCardVisible(false)}
+          user={{
+            id: user.id,
+            name: user.name,
+            cpid: user.cpid,
+            city: user.city,
+            state: user.state,
+            createdAt: user.createdAt,
+            referralCode: user.referralCode,
+          }}
+        />
+      )}
 
       <Modal visible={qrModalVisible} transparent animationType="fade" onRequestClose={() => setQrModalVisible(false)}>
         <Pressable style={qrStyles.overlay} onPress={() => setQrModalVisible(false)}>
