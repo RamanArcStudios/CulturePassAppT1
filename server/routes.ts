@@ -112,6 +112,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/auth/replit", async (req: Request, res: Response) => {
+    try {
+      const userId = req.headers["x-replit-user-id"] as string;
+      const userName = req.headers["x-replit-user-name"] as string;
+      const userProfileImage = req.headers["x-replit-user-profile-image"] as string;
+
+      if (!userId || !userName) {
+        return res.status(401).json({ error: "Not authenticated with Replit" });
+      }
+
+      const user = await storage.upsertReplitUser(userId, userName, userProfileImage);
+      req.session.userId = user.id;
+      const { password: _, ...safeUser } = user;
+      res.json(safeUser);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // ── Events ──
   app.get("/api/events", async (req: Request, res: Response) => {
     try {
